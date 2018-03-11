@@ -2,10 +2,18 @@
 
 namespace Controllers;
 
+use Library\Localization;
+use Library\Params;
+use Library\Sanitize;
+use Library\User;
 use \Library\View,
 	\Library\Composer,
 	\Objects\Record;
+use Models\CreativeModel;
+use Models\MediaTypeModel;
+use Models\ReviewModel;
 use Objects\Ad;
+use Objects\Campaign;
 
 class AdController
 {
@@ -17,6 +25,8 @@ class AdController
 	 */
 	public function form($formName, $adID)
 	{
+		$form = null;
+		
 		switch($formName)
 		{
 			case "delete":
@@ -25,7 +35,7 @@ class AdController
 				$form = new View("modals/deleteAd");
 				
 				//Retrieve needed infos
-				$ad = \Objects\Ad::getInstance($adID);
+				$ad = Ad::getInstance($adID);
 				
 				//Attach infos to the view
 				$form->adID = $ad->getID();
@@ -33,6 +43,9 @@ class AdController
 				
 			break;
 		}
+		
+		if($form == null)
+			return;
 		
 		echo $form->render();
 	}
@@ -49,13 +62,13 @@ class AdController
 	{
 		$_record = Record::createRecord(Record::AD_ADDED);
 		
-		$campaignID = \Library\Sanitize::int($campaignID);
+		$campaignID = Sanitize::int($campaignID);
 		
 		//Authorizations
-		\Library\User::canEditCampaign($campaignID);
+		User::canEditCampaign($campaignID);
 		
 		//Retrieve infos on the campaign
-		$campaign = \Objects\Campaign::getInstance($campaignID);
+		$campaign = Campaign::getInstance($campaignID);
 		
 		//Nbr of ads in the campaigns
 		$nbrAds = $campaign->getNbrAds();
@@ -80,7 +93,7 @@ class AdController
 		}
 		
 		//Create the formated string
-		$defaultDuration = \Library\Params::get("DEFAULT_AD_DURATION");
+		$defaultDuration = Params::get("DEFAULT_AD_DURATION");
 		$days = $defaultDuration["weeks"] * 7 + $defaultDuration["days"];
 		$addString = "P{$defaultDuration["years"]}Y{$defaultDuration["months"]}M{$days}DT{$defaultDuration["hours"]}H{$defaultDuration["minutes"]}M{$defaultDuration["seconds"]}S";
 
@@ -93,7 +106,7 @@ class AdController
 		}
 		
 		//Create the ad
-		$ad = \Objects\Ad::create($campaignID, $campaign->getSupportID(), $startTime->getTimestamp(), $endTime->getTimestamp());
+		$ad = Ad::create($campaignID, $campaign->getSupportID(), $startTime->getTimestamp(), $endTime->getTimestamp());
 		
 		$nbrAds++;
 		
@@ -144,7 +157,7 @@ class AdController
 		$block = new View("ads/block");
 		
 		//Retrieve an ad object
-		$ad = \Objects\Ad::getInstance($adID);
+		$ad = Ad::getInstance($adID);
 		
 		if($ad == false)
 			return;
@@ -162,12 +175,12 @@ class AdController
 		
 		
 		//Retrieve the ad Status
-		$reviewModel = new \Models\ReviewModel();
+		$reviewModel = new ReviewModel();
 		$block->review = $reviewModel->get($adID);
 		
 		//Can we display the review links ?
 		$canReview = false;
-		if(\Library\User::restricted("APPROVE_CREATIVES", true))
+		if(User::restricted("APPROVE_CREATIVES", true))
 			$canReview = true;
 		
 		$block->canReview = $canReview;
@@ -176,8 +189,8 @@ class AdController
 		
 		$screensView = new Composer();
 		
-		$creativeModel = new \Models\CreativeModel();
-		$mediaTypeModel = new \Models\MediaTypeModel();
+		$creativeModel = new CreativeModel();
+		$mediaTypeModel = new MediaTypeModel();
 		
 		//Retrieve all screens
 		$screens = $ad->getScreens();
@@ -232,7 +245,7 @@ class AdController
 		
 		$block->details = "";
 		
-		if(\Library\User::isAdmin())
+		if(User::isAdmin())
 			$block->details = $this->adDetailsBlock($ad);
 		
 		//Attach all the screens block and return the ad block
@@ -263,7 +276,7 @@ class AdController
 			$creativeView->screenName = $screen->getName();
 			$creativeView->creativeStatus = "creativeStatus-".$creative->getStatus();
 			$creativeView->conversionStatus = $creative->getConversionStatus();
-			$creativeView->creativeUploadTime = date(\Library\Localization::dateFormat(), $creative->getUploadTime());
+			$creativeView->creativeUploadTime = date(Localization::dateFormat(), $creative->getUploadTime());
 			$creativeView->creativeUploader = $uploader->getName();
 			$creativeView->creativeSize = $creative->getSize();
 			
@@ -279,16 +292,10 @@ class AdController
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * Permanently delete an ad and its creatives
-	 * @param [[Type]] $adID [[Description]]
+	 * @param int $adID -
+	 * @param bool $silent
 	 */
 	public function delete($adID, $silent = false)
 	{
@@ -298,7 +305,7 @@ class AdController
 			return; //Bad ID
 		
 		//Authorizations
-		if(!\Library\User::canEditAd($ad->getID()))
+		if(!User::canEditAd($ad->getID()))
 		{
 			$_record = Record::createRecord(Record::AD_REMOVED);
 			$_record->setRef1($ad->getID())
@@ -329,13 +336,13 @@ class AdController
 	 */
 	public function update($field, $adID)
 	{
-		$ad = \Objects\Ad::getInstance($adID);
+		$ad = Ad::getInstance($adID);
 		
 		$_record = Record::createRecord(Record::AD_UPDATED);
 		$_record->setRef1($ad->getID());
 		
 		//Authorizations
-		\Library\User::canEditAd($ad->getID());
+		User::canEditAd($ad->getID());
 		
 		//Retirve informations on the ad and its campaign
 		
@@ -348,16 +355,19 @@ class AdController
 			case "enddate":
 				
 				//Set the new start and end dates of the ad
-				if($field == "startdate")
-				{
-					$startDate = \Library\Sanitize::int($_POST['startDate']);
-					$endDate = $ad->getEndTime();
+				switch ($field) {
+					case "startdate":
+						$startDate = Sanitize::int($_POST['startDate']);
+						$endDate = $ad->getEndTime();
+					break;
+					case "enddate":
+						$startDate = $ad->getStartTime();
+						$endDate = Sanitize::int($_POST['endDate']);
+					break;
+					default:
+						return;
 				}
-				else if($field == "enddate")
-				{
-					$startDate = $ad->getStartTime();
-					$endDate = \Library\Sanitize::int($_POST['endDate']);
-				}
+				
 				
 				//Prevent impossible date range
 				if($startDate < $campaign->getStartDate())
