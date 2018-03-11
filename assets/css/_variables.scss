@@ -1,0 +1,53 @@
+$font: 'raleway-modern';
+
+@font-face 
+{
+    font-family: $font;
+    src: url('/assets/fonts/raleway-regular-webfont.eot');
+    src: url('/assets/fonts/raleway-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/assets/fonts/raleway-regular-webfont.woff2') format('woff2'),
+         url('/assets/fonts/raleway-regular-webfont.woff') format('woff'),
+         url('/assets/fonts/raleway-regular-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face 
+{
+    font-family: $font;
+    src: url('/assets/fonts/raleway-bold-webfont.eot');
+    src: url('/assets/fonts/raleway-bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/assets/fonts/raleway-bold-webfont.woff2') format('woff2'),
+         url('/assets/fonts/raleway-bold-webfont.woff') format('woff'),
+         url('/assets/fonts/raleway-bold-webfont.ttf') format('truetype');
+    font-weight: bold;
+    font-style: bold;
+}
+
+/*$font: 'palanquin';
+
+@font-face 
+{
+    font-family: $font;
+    src: url('/assets/fonts/palanquin-regular.ttf'); 
+    font-weight: normal;
+    font-style: normal;
+}*/
+
+
+$imagePath: "/assets/images/";
+
+
+
+
+
+//Logo colors
+$lightBlue: rgb(72, 172, 232);
+$darkBlue: rgb(10, 44, 96);
+
+//Basics colors
+$lightGrey: #DDD;
+
+//Dispatched variables
+$mainColor: $lightBlue;
+$secondaryColor: $darkBlue;

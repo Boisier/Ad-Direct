@@ -1,0 +1,906 @@
+<?php
+$serverURL = "https://{$_SERVER['SERVER_NAME']}";
+?>
+<!doctype>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript">
+            //////////////////////
+            //Global variables
+            ///////////////////
+            let version = 75;
+
+            let server = "<?php echo $serverURL; ?>";
+
+            let CACHNAME = 'ad-direct';
+
+            let campaignID = <?php echo $this->campaignID; ?>;
+            let dataURL = server + "/display/data/" + campaignID;
+            let uplinkURL = server + "/display/register/" + campaignID;
+            let CAMPAIGNCACHENAME = CACHNAME + '-campaign-' + campaignID;
+            var campaignCache;
+
+            let adID = 0;
+
+            let currentTime = Math.round(Date.now() / 1000);
+            let currentTimeMs = Date.now();
+
+            let debug = false;
+            
+            if(<?php echo $this->campaignDebug; ?> == 1)
+            {
+                debug = true;
+            }
+            
+            let broadsignEnvironment = false;
+            
+            
+            //BroadSign Environment
+            var frameID = 0;
+            var displayUnitID = 0;
+            
+            //Display status
+            var readyToDisplay = false;
+            var broadSignPlayFired = false;
+            var displayEnded = false;
+            var inDisplay = false;
+            var skipDisplay = false;
+
+            /**
+             * arrays
+             */
+            var campaignData;
+            var currentCampaignContent = [];
+
+            //Logging function
+            function log(message)
+            {
+                let diff = Date.now() - currentTimeMs;
+
+                if(debug)
+                {
+                    var logBlock = document.getElementById("log-block");
+                    let html = logBlock.innerHTML;
+
+                    logBlock.innerHTML = html + "<p> [" + diff + "] " + message + "</p>";
+
+                    if($( "#display-block" ).has( "div" ).length > 0)
+                        logBlock.style.marginTop = "-" + logBlock.clientHeight + "px";
+                    else
+                        logBlock.style.marginTop = "0px";
+                }
+
+                console.info("> ["+diff+"] " + message);
+            }
+
+        </script>
+        <style type="text/css">
+
+            html, body
+            {
+                margin: 0;
+                padding: 0;
+            }
+
+            body
+            {
+                background-color:#000;
+            }
+
+            #display-block
+            {
+                display: flex;
+            }
+
+            .screen-block
+            {
+                background: #000;
+                overflow: hidden;
+            }
+
+            .screen-picture
+            {
+                background-color: #000;
+            }
+
+            #log-block
+            {
+                position: absolute;
+                left: 0;
+                padding-right: 20px;
+                padding-left: 20px;
+
+                background-color: rgba(0, 0, 0, .75);
+
+                font-family: sans-serif;
+                font-weight: bold;
+                color: #FFF;
+            }
+
+        </style>
+    </head>
+    <body>
+        <section id="display-block">
+        </section>
+        <section id="log-block">
+        </section>
+        <script type="text/javascript">
+
+            igniter();
+
+            ////////////////////////////
+            //Entry point of the app
+            /////////////////////////
+            function igniter()
+            {
+                log("PUSH #" + version);
+                log("----- IGNITION -----");
+
+                //Check if we are running in a Broadsign frame
+                if('BroadSignObject' in window)
+                {
+                    frameID = window.BroadSignObject.frame_id;
+                    displayUnitID = window.BroadSignObject.display_unit_id;
+
+                    broadsignEnvironment = true;
+                    log("This is a Broadsign player ("+campaignID+")");
+                }
+                else
+                {
+                    broadsignEnvironment = false;
+                    log("This is not a Broadsign player");
+                }
+
+                //Do we have access to the storage ?
+                if(!window.caches)
+                {
+                    registerDisplay("NO_CACHE_STORAGE");
+                    log("Could not access cache storage");
+                    return;
+                }
+
+                log("Cache storage is accessible");
+
+                //Let's register our serviceWorker
+                if(!'serviceWorker' in navigator)
+                {
+                    registerDisplay("NO_SERVICE_WORKER_SUPPORT");
+                    log("Could not register serviceWorker");
+                    return;
+                }
+
+                navigator.serviceWorker.register('/assets/displayFile/worker.js', {scope: '/'});
+
+                //Finally, start the display file procedures
+                startDisplay();
+            }
+
+
+            /////////
+            //MAIN
+            /////////////
+
+
+            /**
+             * Open the campaign cache and get campaign data
+             */
+            function startDisplay()
+            {
+                log("Starting display procedures");
+
+                //Access cache
+                caches.open(CAMPAIGNCACHENAME).then(function(cache)
+                {
+                    campaignCache = cache;
+
+                    cache.delete('/assets/displayFile/BroadSignAction.js');
+
+                    getCampaignData().catch(getCampaignDataFromServer);
+                });
+            }
+
+            /**
+             * Get campaign data from the cache
+             */
+            function getCampaignData()
+            {
+                log("Loading campaign data");
+
+                return campaignCache.match(dataURL).then(function(response)
+                {
+                    if(response === undefined)
+                    {
+                        log("No campaign data stored");
+                        throw new Error("No campaign data");
+                    }
+
+                    return response.json().then(fillCampaignDataVar).then(parseCampaignData);
+                })
+            }
+
+            /**
+             * Get campaign data from the server
+             */
+            function getCampaignDataFromServer()
+            {
+                log("Downloading campaign data");
+
+                return caches.open(CAMPAIGNCACHENAME).then(function(cache) {
+                    return cache.add(dataURL).then(getCampaignData);
+                });
+            }
+
+            /**
+             * Pass campaign data to global variable
+             */
+            function fillCampaignDataVar(campaignDataAsJson)
+            {
+                campaignData = campaignDataAsJson;
+            }
+
+            /**
+             * Extract info from the campaign data
+             */
+            function parseCampaignData()
+            {
+                if(!campaignIsValid())
+                    return;
+
+                log("Parsing campaign content");
+
+                //Gather available creatives
+                campaignData.ads.forEach(function(ad)
+                {
+                    ad.creatives.forEach(function(creative)
+                    {
+                        currentCampaignContent.push(createURL(creative.path));
+                    });
+                });
+
+                //gather available default ads
+                /*for(var screenID in campaignData.screens)
+                {
+                    ad.creatives.forEach(function(creative)
+                    {
+                        currentCampaignContent.push(createURL(creative.path));
+                    });
+                }*/
+
+                updateCacheContent().then(prepareDisplay).then(refreshCampaignData).then(function()
+                {
+                    readyToDisplay = true;
+                    log("----- READY TO DISPLAY AD # " + adID + "-----");
+
+                    StartBroadcast();
+
+                    setTimeout(checkDisplay, 1000);
+                });
+            }
+
+            /**
+             * Check if the campaign data needs to be refreshed
+             */
+            function refreshCampaignData()
+            {
+                //Check campaign data age
+                //Refresh campaign data every 5 minutes
+                if(campaignData.time + 600 < currentTime)
+                {
+                    log("Refreshing campaign data");
+                    campaignCache.delete(dataURL).then(campaignCache.add(dataURL));
+                }
+            }
+
+            /**
+             * Verify the validity of the campaign data
+             */
+            function campaignIsValid()
+            {
+                log("Checking campaign");
+
+                //Check campaign status
+                if(campaignData.status != "OK")
+                {
+                    //Remove cache associated with this campaign
+                    caches.delete(CAMPAIGNCACHENAME);
+
+                    registerDisplay("CAMPAIGN_BAD_STATUS");
+                    log("Campaign status is wrong");
+                    skipDisplay = true;
+                    return false;
+                }
+
+                //Check campaign interval
+                if(currentTime < campaignData.start || currentTime > campaignData.end)
+                {
+                    //Out of the campaign interval let's stop here
+                    registerDisplay("OUT_OF_CAMPAIGN");
+                    log("Not in campaign interval");
+                    skipDisplay = true;
+                    return false
+                }
+
+                //Is there anything to show ?
+                if(campaignData.ads.length === 0)
+                {
+                    //Remove cache associated with this campaign
+                    caches.delete(CAMPAIGNCACHENAME);
+
+                    registerDisplay("NO_ADS_TO_SHOW");
+                    log("No ads in campaign");
+                    skipDisplay = true;
+                    return false;
+                }
+
+                return true;
+            }
+
+            /**
+             * Remove unused entries in the campaign cache
+             */
+            function updateCacheContent()
+            {
+                //Clean up cache
+                return campaignCache.keys().then(function(keys)
+                {
+                    //Check if key is present in campaign data
+                    keys.forEach(function(request)
+                    {
+                        if(request.url == dataURL)
+                            return;
+
+                        //Get url position in campaign content
+                        let elementIndex = currentCampaignContent.indexOf(request.url);
+
+                        //Url is missing
+                        if(elementIndex === -1)
+                        {
+                            //Remove link
+                            campaignCache.delete(request);
+                            return;
+                        }
+
+                        //Url is already cached, no need to cache it again
+                        currentCampaignContent.splice(elementIndex, 1);
+                    });
+                });
+            }
+
+
+            /**
+             * Add creatives in the currentCampaignContent to the cache
+             */
+            function cacheCreatives()
+            {
+                if(currentCampaignContent.length === 0)
+                    return;
+
+                //Add first URL to the cache
+                campaignCache.add(currentCampaignContent[0]).then(function()
+                {
+                    //Repeat until array is empty
+                    currentCampaignContent.shift();
+                    cacheCreatives();
+                }).catch(errorWhileAddingToCache);
+            }
+
+
+
+            function prepareDisplay()
+            {
+                log("Preparing display");
+
+                //Build the structure
+                buildStructure();
+
+                //Select Ad to play
+                var adKey = selectAdToDisplay();
+
+                if(adKey === -1)
+                {
+                    registerDisplay("NOT_IN_ANY_AD_INTERVAL");
+                    log("No ads to show");
+                    return Promise.reject();
+                }
+
+                adID = campaignData.ads[adKey].adID;
+
+                //Save current ad index for next display
+                localStorage.setItem("campaign-" + campaignID + "-last-displayed", adKey);
+
+                return placeCreative(adKey).then(cacheCreatives);
+            }
+
+
+
+
+            function buildStructure()
+            {
+                log("Building display structure");
+
+                var totalWidth = 0;
+                var screenNbr = 0;
+
+                for(screenID in campaignData.screens)
+                {
+                    var screen = campaignData.screens[screenID];
+
+                    var screenBlock = document.createElement("div");
+                    screenBlock.className = "screen-block";
+                    screenBlock.setAttribute("id", "screen-block-" + screen.screenID);
+                    screenBlock.style.width = screen.screenWidth + "px";
+                    screenBlock.style.height = screen.screenHeight + "px";
+
+                    totalWidth += parseInt(screen.screenWidth);
+
+                    $("#display-block").append(screenBlock);
+
+                    ++screenNbr;
+                }
+
+                $("#display-block").css("width", totalWidth + "px");
+            }
+
+
+
+
+
+            function displayDefaultAds()
+            {
+                log("Displaying default ads");
+
+                for(screenID in campaignData.screens)
+                {
+                    if(campaignData.screens[screenID].defaultCreative === false)
+                    {
+                        registerDisplay("NO_DEFAULT_AD");
+                        log("No default ad to display");
+                        stopDisplay();
+                        return;
+                    }
+
+                    var creativeBlock = buildPictureBlock(campaignData.screens[screenID].defaultCreative, screenID);
+                    $("#screen-block-" + screenID).html(creativeBlock);
+                }
+
+                registerDisplay("DEFAULT_AD");
+            }
+
+
+
+            function checkDisplay()
+            {
+                if(inDisplay)
+                    return;
+
+                log("Checking screens")
+
+                let videos = document.getElementsByClassName("screen-video");
+
+                for(var i = 0; i < videos.length; i++)
+                {
+                    if(videos[i].readyState < 4)
+                        videos[i].load();
+                }
+            }
+
+
+
+
+
+            function selectAdToDisplay()
+            {
+                log("Selecting ad to play");
+
+                var lastDisplayed = Number(localStorage.getItem("campaign-" + campaignID + "-last-displayed"));
+
+                if(lastDisplayed !== lastDisplayed)
+                    lastDisplayed = 0;
+
+                var toDisplay = lastDisplayed;
+
+                for(var i = 0; i < campaignData.ads.length; i++)
+                {
+                    if(toDisplay === null || toDisplay + 1 >= campaignData.ads.length)
+                        toDisplay = 0; //End of loop, play the first of the array
+                    else
+                        toDisplay++;
+
+                    if(currentTime >= campaignData.ads[toDisplay].start && currentTime <= campaignData.ads[toDisplay].end)
+                    {
+                        return toDisplay;
+                    }
+                }
+
+                return -1;
+            }
+
+
+
+            /**
+             * Preload creatives that will be played, then create the structure
+             */
+            function placeCreative(adKey)
+            {
+                log("Placing creatives");
+
+                var creativesToLoad = [];
+
+                campaignData.ads[adKey].creatives.forEach(function(creative)
+                {
+                    //Get url position in campaign content
+                    let elementIndex = currentCampaignContent.indexOf(createURL(creative.path));
+
+                    if(elementIndex !== -1)
+                    {
+                        currentCampaignContent.splice(elementIndex, 1);
+                        creativesToLoad.push(createURL(creative.path));
+                    }
+                });
+
+                return campaignCache.addAll(creativesToLoad).then(function()
+                {
+                    campaignData.ads[adKey].creatives.forEach(function(creative)
+                    {
+                        if(creative.mediaType == 1)
+                        {
+                            buildPictureBlock(creative);
+                        }
+                        else if(creative.mediaType == 2)
+                        {
+                            buildVideoBlock(creative);
+                        }
+                    });
+                });
+            }
+
+
+            /**
+             * Create the HTML struture for a picture screen
+             */
+            function buildPictureBlock(creative)
+            {
+                var block = document.createElement("img");
+                block.src = createURL(creative.path);
+                block.width = campaignData.screens[creative.screenID].screenWidth;
+                block.height = campaignData.screens[creative.screenID].screenHeight;
+                block.className = "screen-picture";
+
+                $("#screen-block-" + creative.screenID).html(block);
+            }
+
+
+
+            /**
+             * Create the HTML struture for a video screen
+             */
+            function buildVideoBlock(creative)
+            {
+                var block = document.createElement("video");
+                block.src = createURL(creative.path);
+                block.width = campaignData.screens[creative.screenID].screenWidth;
+                block.height = campaignData.screens[creative.screenID].screenHeight;
+                block.setAttribute("preload", "auto");
+                block.className = "screen-video"
+                block.setAttribute("crossOrigin", "anonymous");
+                block.load();
+
+                $("#screen-block-" + creative.screenID).html(block);
+            }
+
+
+            /**
+             * Called when broadisgn starts airing the ad
+             */
+            function BroadSignPlay()
+            {
+                log(">>> BroadSignPlay()");
+            
+                broadSignPlayFired = true;
+                
+                if(skipDisplay)
+                {
+                    stopDisplay();
+                    return;
+                }
+                StartBroadcast();
+            }
+            
+            function StartBroadcast()
+            {
+                //Already called
+                if(inDisplay)
+                    return;
+                
+                //Called too early
+                if(!broadSignPlayFired || !readyToDisplay)
+                    return;
+
+                checkDisplay();
+
+                inDisplay = true;
+                
+                $(".screen-video").each(function() { $(this).get(0).play(); });
+                $(".screen-video").on("ended", videoEnded);
+
+                checkVideosArePlaying();
+                
+                log("----- DISPLAYING -----");
+                registerDisplay("OK");
+            }
+            
+            var retryCount = 0;
+            
+            function checkVideosArePlaying()
+            {
+                if(retryCount > 4)
+                {
+                    registerDisplay("COULD_PLAY_IN_TIME");
+                    stopDisplay();
+                    return;
+                }
+                
+                log("Checking videos are playing (" + retryCount + ")");
+                
+                let videos = document.getElementsByClassName("screen-video");
+
+                var allOkay = true;
+                
+                for(var i = 0; i < videos.length; i++)
+                {
+                    log(videos[i].currentTime);
+                    if(videos[i].currentTime > 0)
+                        continue;
+                    
+                    log("Force playing video "+i);
+                    videos[i].play();
+                    allOkay = false;
+                }
+                
+                if(!allOkay)
+                {
+                    retryCount++;
+                    setTimeout(checkVideosArePlaying, 250);
+                }
+            }
+
+            function videoEnded()
+            {
+                if(displayEnded)
+                    return;
+
+                displayEnded = true;
+                log("The first video has ended");
+                stopDisplay();
+            }
+
+
+
+
+            function registerDisplay(ref)
+            {
+                //Get the history
+                var campaignHistory = JSON.parse(localStorage.getItem("campaign-" + campaignID + "-history"));
+
+                //Build needed structure
+                if(campaignHistory === null)
+                {
+                    campaignHistory = {
+                        lastPush: currentTime,
+                        ballID: Date.now() + "-" + frameID,
+                        frameID: displayUnitID,
+                        history: []
+                    };
+                }
+
+                //Register current display
+                campaignHistory.history.push([adID, ref, currentTime]);
+
+                //Save new campaignHistory
+                localStorage.setItem("campaign-" + campaignID + "-history", JSON.stringify(campaignHistory));
+
+                //Do we need to send it ?
+                /*if(currentTime - campaignHistory.lastPush < 600)
+					return;*/
+                //Let's try to do real-time : send the view each time.
+                //The no-connection fallback is conserved
+
+                $.ajax({
+                    method: "POST",
+                    url: uplinkURL,
+                    data: campaignHistory
+                }).done(function (data)
+                {
+                    localStorage.removeItem("campaign-" + campaignID + "-history");
+                });
+            }
+
+
+
+
+
+            //////////////////////
+            //  UTILS
+            ////////////////////
+
+            function createURL(URI)
+            {
+                return server + URI;
+            }
+
+            //End point of the programme
+            function stopDisplay()
+            {
+                displayEnded = true;
+
+                log("----- END OF DISPLAY -----");
+
+                if(!debug)
+                {
+                    $("#display-block").hide();
+                }
+
+                if(broadsignEnvironment)
+                {
+                    initWebSocket('<rc action="stop" regenerate="0" id="1" duration="0" name="" show_data="0" version="1" enabled="0" frame_id="0" source="application" clear="0"/>');
+                }
+            }
+
+
+            Array.prototype.swap = function (x,y) {
+                var b = this[x];
+                this[x] = this[y];
+                this[y] = b;
+                return this;
+            }
+
+            function errorWhileAddingToCache(e)
+            {
+                console.log(e);
+                registerDisplay("CANNOT_ADD_TO_CACHE");
+                log("Error while adding to cache");
+            }
+
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+
+
+
+
+
+
+            //////////////////////
+            //  BROADSIGN ACTION
+            ////////////////////
+
+            // Courtesy of broadsign support
+
+            //Commands
+            var show_loop = '<rc regenerate="0" name="" id="1" frame_id="0" source="application" show_data="0" version="1" action="show_loop" clear="0" duration="0" enabled="0"/>';
+            var now_playing = '<rc enabled="0" frame_id="0" source="application" id="1" action="now_playing" name="" duration="0" version="1" clear="0" regenerate="0" show_data="0"/>';
+            var stop = '<rc action="stop" regenerate="0" id="1" duration="0" name="" show_data="0" version="1" enabled="0" frame_id="0" source="application" clear="0"/>';
+            var cond_list = '<rc source="application" clear="0" version="1" id="1" name="" duration="0" action="condition" list_active="1" show_data="0" enabled="0" regenerate="0" frame_id="0"/>';
+            var cond_enable = '<rc duration="0" id="1" name="C1" action="condition" enabled="1" regenerate="0" frame_id="0" show_data="0" clear="0" source="application" version="1"/>';
+            var cond_disable = '<rc frame_id="0" show_data="0" action="condition" version="1" id="1" duration="0" enabled="0" clear="0" name="C1" regenerate="0" source="application"/>';
+            var query_incidents = '<rc clear="0" duration="0" regenerate="0" name="" version="1" source="application" frame_id="0" id="1" enabled="0" show_data="0" action="query_incidents"/>';
+            var open_incident = '<rc name="" problem_description="Opening external incident with id: 10001" clear="0" version="1" frame_id="0" source="application" id="1" regenerate="0" enabled="0" action="open_incident" type="10001" duration="0" show_data="0"/>';
+            var close_incident = '<rc name="" source="application" frame_id="0" id="1" regenerate="0" version="1" action="close_incident" show_data="0" clear="0" duration="0" resolution_description="Closing external incident with id: 10001" enabled="0" type="10001"/>';
+            var device = '<rc frame_id="0" clear="0" show_data="0" version="1" name="power" id="1" duration="0" source="application" value="1" enabled="0" regenerate="0" action="device_operation"/>';
+            var in_day_part = '<rc duration="0" show_data="0" source="application" regenerate="0" enabled="0" id="1" action="in_day_part" frame_id="0" name="" clear="0" version="1"/>';
+            var data_capture = '<rc data="test1=1" id="1" duration="0" version="1" show_data="0" enabled="0" frame_id="0" name="" source="application" regenerate="0" clear="0" campaign_id="77261" action="data_capture"/>';
+            var trigger = '<rc synchronization_role="2" truncate_current="0" version="6" pre_buffer="0" synchronization_set="0" disable_audio="0" trigger_category_id="49114" action="trigger" id="1"/>';
+
+            var show_loop_pass = '<rc regenerate="0" name="" id="1" frame_id="0" source="application" show_data="0" version="1" action="show_loop" clear="0" duration="0" enabled="0" password="playerpass"/>';
+            var now_playing_pass = '<rc enabled="0" frame_id="0" source="application" id="1" action="now_playing" name="" duration="0" version="1" clear="0" regenerate="0" show_data="0" password="playerpass"/>';
+            var stop_pass = '<rc action="stop" regenerate="0" id="1" duration="0" name="" show_data="0" version="1" enabled="0" frame_id="0" source="application" clear="0" password="playerpass"/>';
+
+            var json_show_loop =  '{"rc":{"regenerate":"0","name":"","id":"1","frame_id":"0","source":"application","show_data":"0","version":"1","action":"show_loop","clear":"0","duration":"0","enabled":"0"}}';
+            var json_now_playing = '{"rc":{"enabled":"0","frame_id":"0","source":"application","id":"1","action":"now_playing","name":"","duration":"0","version":"1","clear":"0","regenerate":"0","show_data":"0"}}';
+            var json_stop = '{"rc": {"version": "1", "action": "stop", "clear": "0", "enabled": "0", "frame_id": "0", "name": "", "id": "1", "source": "application", "duration": "0", "regenerate": "0", "show_data": "0" } }';
+            var json_trigger = '{"rc": {"synchronization_role":"2","truncate_current":"0","version":"6","pre_buffer":"0","synchronization_set":"0","disable_audio":"0","trigger_category_id":"49114","action":"trigger","id":"1"}}';
+
+            var json_show_loop_pass =  '{"rc":{"regenerate":"0","name":"","id":"1","frame_id":"0","source":"application","show_data":"0","version":"1","action":"show_loop","clear":"0","duration":"0","enabled":"0", "password":"playerpass"}}';
+            var json_now_playing_pass = '{"rc":{"enabled":"0","frame_id":"0","source":"application","id":"1","action":"now_playing","name":"","duration":"0","version":"1","clear":"0","regenerate":"0","show_data":"0", "password":"playerpass"}}';
+            var json_stop_pass = '{"rc": {"version": "1", "action": "stop", "clear": "0", "enabled": "0", "frame_id": "0", "name": "", "id": "1", "source": "application", "duration": "0", "regenerate": "0", "show_data": "0", "password":"playerpass" } }';
+            
+
+            function sendMessage(s1) {
+                var msg = '<rc action="stop" regenerate="0" id="1" duration="0" name="" show_data="0" version="1" enabled="0" frame_id="0" source="application" clear="0"/>';
+                    
+                log("msg:" + escapeHtml(msg));
+                
+                if ( websocket != null )
+                {
+                    log("websockNotNull");
+                    websocket.send( msg );
+                    log( "\nSending:\n" + msg.split("\r\n" ).join("\\r\\n"));
+                }
+                
+            }
+
+            wsUri = "ws://localhost:2326";
+            var websocket = null;
+
+            function initWebSocket(s1) {
+                try {
+                    if (typeof MozWebSocket == 'function')
+                        WebSocket = MozWebSocket;
+                    if ( websocket && websocket.readyState == 1 )
+                        websocket.close();
+                    websocket = new WebSocket( wsUri );
+                    websocket.onopen = function (evt) {
+                        log("CONNECTED");
+                        sendMessage(s1);
+                    };
+                    /*websocket.onclose = function (evt) {
+                        debug("DISCONNECTED");
+                    };*/
+                    websocket.onmessage = function (evt) {
+                        log( "\nReceived: \n" + evt.data );
+                        //debug( evt.data );
+                    };
+                    websocket.onerror = function (evt) {
+                        log('ERROR: ' + evt.data);
+                    };
+                } catch (exception) {
+                    log('ERROR: ' + exception);
+                }
+            }
+
+            function stopWebSocket() {
+                if (websocket)
+                    websocket.close();
+            }
+
+            function checkSocket() {
+                if (websocket != null) {
+                    var stateStr;
+                    switch (websocket.readyState) {
+                        case 0: {
+                            stateStr = "CONNECTING";
+                            break;
+                        }
+                        case 1: {
+                            stateStr = "OPEN";
+                            break;
+                        }
+                        case 2: {
+                            stateStr = "CLOSING";
+                            break;
+                        }
+                        case 3: {
+                            stateStr = "CLOSED";
+                            break;
+                        }
+                        default: {
+                            stateStr = "UNKNOW";
+                            break;
+                        }
+                    }
+                    debug("WebSocket state = " + websocket.readyState + " ( " + stateStr + " )");
+                } else {
+                    log("WebSocket is null");
+                }
+            }
+
+            function changeWebSocketUri() {
+                var msg = document.getElementById("wsUriText").value;
+                var prefix = "ws://";
+                this.wsUri = prefix.concat(msg);
+            }
+
+            function resetWebSocketUri() {
+                this.wsUri = "ws://localhost:2326";
+            }
+        </script>
+    </body>
+</html>

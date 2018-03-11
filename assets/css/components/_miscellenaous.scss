@@ -1,0 +1,295 @@
+
+a
+{
+    text-decoration: none;
+}
+
+/*-----------------------------------------------------*/
+/* Global                                              */
+/*-----------------------------------------------------*/
+
+.aloneTitle
+{
+    margin: 0;
+    font-weight: bold;
+}
+
+.row.spaceTop
+{
+    margin-top: 10px;
+}
+
+
+
+
+/*-----------------------------------------------------*/
+/* Accounts                                            */
+/*-----------------------------------------------------*/
+
+#listAcounts
+{
+    
+}
+
+.userActionsGroup
+{
+    width: 100px;
+}
+
+.userActionsGroup>.btn-group>ul
+{
+    left: auto;
+    right: 0;
+}
+
+#listAccountsTable tr[visible='false']
+{
+    display: none;
+}
+
+
+
+
+
+
+
+
+/*-----------------------------------------------------*/
+/* Pending                                             */
+/*-----------------------------------------------------*/
+
+.judgeRow
+{
+    margin-top: 20px;
+}
+
+.playInfos .clientName
+{
+    font-weight: bold;
+}
+
+.playInfos .companyName
+{
+	margin-top: -10px;
+}
+
+.pendingWell .commentTitle
+{
+    font-weight: bold;
+    margin-top: 0;
+}
+
+
+
+
+
+
+/*-----------------------------------------------------*/
+/* Company                                               */
+/*-----------------------------------------------------*/
+
+.creativeContainer
+{
+	width: 196px;
+	height: 196px;
+	
+	background-color: #EEE;
+} 
+
+.defaultAdThumb
+{
+	display: block;
+	max-height: 250px;
+}
+
+
+
+
+
+
+/*-----------------------------------------------------*/
+/* Spots                                               */
+/*-----------------------------------------------------*/
+
+
+.spotBlock h4,
+.targetWell h4
+{
+    font-weight: bold;
+}
+
+
+
+
+
+
+/*-----------------------------------------------------*/
+/* Params                                              */
+/*-----------------------------------------------------*/
+
+.helpBlock
+{
+    display: block;
+    margin: 5px 0 0 165px;
+}
+
+
+
+
+
+
+/*-----------------------------------------------------*/
+/* Bootstrap fixes                                     */
+/*-----------------------------------------------------*/
+
+
+
+/*-----------------------------------------------------*/
+/* Miscellenaous                                       */
+/*-----------------------------------------------------*/
+
+
+
+.bigParaph
+{
+    text-align: center;
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 25px 0 0 0;
+	
+	&.spaced
+	{
+    	margin: 40px 0;
+	}
+}
+
+textarea { resize:vertical ; }
+
+
+.navbar-right
+{
+    margin-right: 8px;
+}
+
+.navbar-form.navbar-right
+{
+    margin-right: -5px;
+}
+
+p.navbar-right
+{
+    margin-right: 15px;
+}
+
+.spacer
+{
+	margin-top: 10px;
+}
+
+.bigSpacer
+{
+	margin-top: 20px;
+}
+
+.bold
+{
+	font-weight: bold; 
+}
+
+.noMarginBottom
+{
+	margin-bottom: 0;
+}
+
+.corps>div>h1:first-child
+{
+    margin-top: -10px; 
+}
+
+.corps>h3:first-child,
+.well>h4:first-child
+{
+    margin-top: 0px;
+}
+
+.corps>h1:first-child,
+.panel-heading>h2:first-child
+{
+    margin-top: 5px;
+}
+
+
+h1.spaceTop
+{
+    margin-top: 10px!important;
+}
+
+form
+{
+    margin: 15px 0 0 0;
+}
+
+.vcenter
+{
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.table>tbody>tr>td
+{
+    vertical-align: middle;
+}
+
+h1>small.link
+{
+    cursor: pointer;
+}
+
+h1>small:before
+{
+    content: " ";
+}
+
+.tab-pane>.navbar
+{
+    margin-top: 15px;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+}
+
+.form-group .control-label
+{
+    text-align: left;
+}
+
+.panel:last-child
+{
+    margin-bottom: 0;
+}
+
+.strut
+{
+	display: inline-block;
+	height: 100%;
+	vertical-align: middle;
+}
+
+
+
+.datepicker * 
+{
+	border-width: 0!important;
+	border-top-width: 0!important;
+}
+
+.datepicker td,
+.datepicker th,
+{
+	border-width: 0!important;
+	border-top-width: 0!important;
+	
+	padding: .5rem;
+}

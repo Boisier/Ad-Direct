@@ -1,0 +1,10 @@
+#Options +FollowSymlinks
+
+RewriteEngine on
+
+#Rewriting urls
+#ErrorDocument 500 /views/errors/500.php
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]

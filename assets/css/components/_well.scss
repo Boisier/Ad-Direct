@@ -1,0 +1,38 @@
+.well
+{
+	&:last-child
+	{
+    	margin-bottom: 0;
+	}
+	
+	.playWell
+	{
+		font-weight: bold;
+
+		.playImageCol img
+		{
+			width: 100%;
+		}
+		
+		.input-daterange
+		{
+			width: 100%;
+		}
+
+		.btn-reorder
+		{
+		   cursor:ns-resize;
+			float: right;
+		}
+
+		.comment
+		{
+			font-style: italic;
+		}
+	}
+	
+	&.link
+	{
+		cursor: pointer;
+	}
+}

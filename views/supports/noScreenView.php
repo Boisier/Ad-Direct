@@ -1,0 +1,1 @@
+<h6 class="mt-4 text-center font-weight-bold"><?php echo \__("noScreens"); ?></p>

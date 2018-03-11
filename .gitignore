@@ -1,0 +1,8 @@
+.idea
+RESSOURCES
+PHP
+assets/third-parties
+assets/vendor
+campaigns
+thumbs
+node_modules

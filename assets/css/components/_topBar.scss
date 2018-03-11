@@ -1,0 +1,116 @@
+#topBar
+{
+    display:block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 60px;
+    width: 100%;
+    z-index: 999;
+    
+    background-color: #FFF;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    -webkit-box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+
+	#logoTop
+	{
+		float: left;
+		overflow: auto;
+		height: 60px;
+		width: 250px;
+		
+		span
+		{
+			display: block;
+			height: 40px;
+			width: 250px;
+			margin-top: 10px;
+
+			background-image: url(#{$imagePath}logo.png);
+			background-position: center center;
+			background-size: contain;
+			background-repeat: no-repeat;
+		}
+	}
+	
+	#helloBox
+	{
+		float: left;
+		height: 60px;
+		padding: 0 20px;
+
+		line-height: 60px;
+		font-size: 16pt;
+	}
+
+	#actionsTop
+	{
+		float: right;
+	
+		.headerLink
+		{
+			vertical-align: top;
+			display: inline-block;
+			height: 60px;
+			padding: 0 20px;
+
+			text-decoration: none;
+			font-size: 12pt;
+			text-align: center;
+			line-height: 60px;
+			font-weight: 700;
+			color: $mainColor;
+
+			-webkit-transition: .25s cubic-bezier(0, .58, .58, 1);
+
+			transition: .25s cubic-bezier(0, .58, .58, 1);
+			
+			&:hover
+			{
+				background-color: $mainColor;
+				color: #FFF;
+				border-bottom: 1px solid rgba(0, 0, 0, .2);
+			}
+		}
+
+		#logoutBtn
+		{
+			font-size: 20pt;
+			
+			i
+			{
+				padding-top: 17px;
+			}
+		}
+		
+	}
+}
+
+#language
+{
+    display: block;
+    position: absolute;
+	z-index: 11;
+    top: 18px;
+    right: 0;
+	
+	a
+	{
+		padding: 20px;
+
+		font-weight: 700;
+		background-color: #FFF;
+		color: $mainColor;
+
+		-webkit-transition: .25s cubic-bezier(0, .58, .58, 1);
+
+		transition: .25s cubic-bezier(0, .58, .58, 1);
+		
+		&:hover
+		{
+			background-color: $mainColor;
+			color: #FFF;
+		}
+	}	
+}

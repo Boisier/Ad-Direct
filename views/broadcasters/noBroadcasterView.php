@@ -1,0 +1,1 @@
+<div class="bigParaph"><?php echo \__("noBroadcaster"); ?></p>

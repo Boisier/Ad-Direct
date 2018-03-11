@@ -1,0 +1,47 @@
+.borderBox
+{
+    display: block;
+    position: relative;
+    margin: 0 auto;
+    
+    border: 3px solid #333;
+    background-color: #DDD;
+
+	&.landscape
+	{
+		width: 200px;
+		height: 112.5px;
+	}
+
+	&.portrait
+	{
+		width: 112.5px;
+		height: 200px;
+	}
+
+	&.square
+	{
+		width: 200px;
+		height: 200px;
+	} 
+
+	.widthValue
+	{
+		position: absolute;
+		top: 3px;
+		width: 100%;
+
+		text-align: center;
+		font-style: italic;
+	}
+
+	.heightValue
+	{
+		position: absolute;
+		right: 5px;
+		top: calc(50% - 10px);
+
+		text-align: right;
+		font-style: italic;
+	}
+}

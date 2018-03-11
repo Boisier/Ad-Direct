@@ -1,0 +1,100 @@
+#loginBox
+{
+    margin:auto;
+	
+	.blocContainer 
+	{
+		display: block;
+		width: 400px;
+		padding: 20px 20px 40px;
+		margin: 0 auto 40px auto;
+
+		background-color: rgba(255, 255, 255, .9);
+		border-radius: 5px;
+		border-top: 1px solid #FFF;
+		border-bottom: 1px solid #CCC;
+	
+		&:first-child
+		{
+			@media only screen and (max-height: 560px) 
+			{
+				margin-top: 0;
+			}
+		}
+
+		&:last-child
+		{
+			margin-bottom: 0;
+		}
+
+		#bigLogo
+		{
+			display: block;
+			width: 300px;
+			margin: 30px auto 0;
+		}
+		
+		@media only screen and (max-width: 440px) 
+		{
+			width: calc(100% + 40px);
+		}
+
+		&.wide
+		{
+			width: 800px;
+		}
+	}
+
+	h2
+	{
+		text-align: center;
+		color: $secondaryColor;
+		text-transform: uppercase;
+    	margin-top: .7rem;
+	}
+
+	input[type=text],
+	input[type=password]
+	{
+		display: block;
+		padding: 10px;
+		width: 50%;
+		margin: 20px auto 0 auto;
+
+		border: none;
+		border-bottom: 1px solid $secondaryColor;
+		outline: none;
+		background-color: transparent;
+	}
+
+	input[type=submit]
+	{
+		display: block;
+		width: calc(50% + 20px);
+		padding: 10px 0;
+		margin: 35px auto 0;
+
+		border: 1px solid $secondaryColor;
+		background-color: $secondaryColor;
+		color: #FFF;
+		font-weight: 700;
+		cursor: pointer;
+
+		-webkit-transition: .25s cubic-bezier(0, .58, .58, 1);
+
+		transition: .25s cubic-bezier(0, .58, .58, 1);
+	
+		&:hover
+		{
+			background-color: transparent;
+			color: $secondaryColor;
+		}
+	}
+	
+	.errorMessage
+	{
+		text-align: center;
+		font-size: 12pt;
+		font-weight: bold;
+	}
+}

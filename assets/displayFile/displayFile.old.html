@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- saved from url=(0014)about:internet -->
+        <script type="text/javascript">
+            ///////////
+			//JQUERY//
+            /////////
+           
+			//////////
+			//LZSTRING (ZIP)
+			////////
+		</script>
+        <style type="text/css">
+            html,
+            body
+            {
+                margin: 0;
+                width: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+            
+            body
+            {
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-image: 
+            }
+            
+            img
+            {
+                height: 100%;
+                width: 100%;
+            }
+            
+            #logOverlay
+            {
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                
+                background-color: rgba(0, 0, 0, .75);
+                
+                font-family: sans-serif;
+                font-weight: bold;
+                color: #FFF;
+            }
+        </style>
+    </head>
+    <body>
+        <img id="MainPict">
+        <div id="logOverlay"></div>
+        <script type="text/javascript">
+            !localStorage&&(l=location, p=l.pathname.replace(/(^..)(:)/,"$1$$"), (l.href=l.protocol+"//127.0.0.1"+p));
+            
+            //Implementation de nextweek
+            Date.prototype.addDays = function (d) {
+                if (d) {
+                    var t = this.getTime();
+                    t = t + (d * 86400000);
+                    this.setTime(t);
+                }
+            };
+            
+            var data;            
+            var playDates;            
+            var online = true;
+            var printLogs = false;
+            
+            function log(txt)
+            {
+                if(printLogs)
+                    $("#logOverlay").append("<p>"+txt+"</p>");
+            }
+            
+            function startDisplay()
+            {                
+                //A t-on déjà des données en référence ?
+                if (localStorage.getItem("spotData"+hash) !== null) 
+                {
+                    log("SPOT DATA FOUND");
+                    //Oui
+                    data = JSON.parse(localStorage.getItem("spotData"+hash));
+                    
+                    log(JSON.stringify(data));
+                
+                    //A-ton des dates d'expiration en mémoire ?
+                    if (localStorage.getItem("playDates") !== null) 
+                    {
+                        playDates = JSON.parse(localStorage.getItem("playDates"));
+                    }
+                    else
+                    {
+                        playDates = {};
+                    }
+                    
+                    log("CALL DISPLAY ADD");
+                    //Oui, on tente d'afficher l'image
+                    displayAd();
+                    
+                    //Ces données sont-elles récentes ?
+                    if(data.infos.date < Date.now() - timeRefresh * 1000)
+                    {
+                        log("CALL UPDATE AFTER DISPLAY ADD");
+                        //Non, on les mets à jour,et on renvoie nos stats
+                        updateData(true);
+                    }
+                }
+                else
+                {
+                    log("NO SPOT DATA FOUND - UPDATE");
+                    updateData(false)
+                }
+            }
+            
+            function updateData(sendData)
+            {
+                if(sendData)
+                {
+                    $.ajax({
+                        method: "POST",
+                        url: urlServer+"updateSpot/"+hash+"/"+target,
+                        data: { data: localStorage.getItem("spotData"+hash) }
+                    }) 
+                }
+                
+                log("BEGINNING OF UPDATE");
+                
+                $.ajax({
+                    dataType: "json",
+                    url: urlServer+"spotcontent/"+hash+"/"+target
+                }).done(function (data) {
+                    localStorage.setItem("spotData"+hash, JSON.stringify(data));
+                    log("UPDATE RECEIVED");
+                    
+                    log(JSON.stringify(data));
+
+                    //On efface les plays anciens 
+                    data.delete.forEach(function (element, index, array){
+                        if (localStorage.getItem("play"+element) !== null) 
+                        {
+                            localStorage.removeItem("play"+element);
+                        }
+                        
+                        delete playDates[element];
+                    });
+
+                }).error(function (){ 
+                    online = false;
+                });
+            }
+            
+            var trys = 0;
+            var toPlay;
+            
+            function displayAd()
+            {
+                //Y a t'il des images à afficher ?
+                if(data.plays.length != 0)
+                {
+                    //Oui
+                    //A-t-on déjà afficher une image de la boucle ici ?
+                    if (localStorage.getItem("lastPlayed"+hash) === null) 
+                    {
+                        //Non, alors on se met sur la première (0)
+                        toPlay = 0;
+                    }
+                    else
+                    {
+                        //Oui
+                        toPlay = Number(localStorage.getItem("lastPlayed"+hash)) + 1;
+                        
+                        //A-t-on atteint la fin de la boucle ?
+                        if(toPlay >= data.plays.length)
+                        {
+                            //Oui, alors on recommence la boucle
+                            toPlay = 0;
+                        }
+                    }
+                    
+                    //L'image recherché peut-elle être affichée d'après ses dates?
+                    if(data.plays[toPlay].start < Date.now() && data.plays[toPlay].end > Date.now())
+                    {
+                        //Oui, on continue
+                        
+                        //l'Image recherché est-elle en mémoire ?
+                        if (localStorage.getItem("play"+data.plays[toPlay].id) === null) 
+                        {
+                            //Non, il faut la télécharger avant de l'afficher
+                            $.ajax({
+                                dataType: "text",
+                                url: urlServer+"getPlay/"+data.plays[toPlay].id
+                            }).done(function (image) {
+                                //On enregstre, et on affiche
+                                localStorage.setItem("play"+data.plays[toPlay].id, LZString.compressToUTF16(image));
+                                printAd();
+                            }).error(function (){ 
+                                online = false;
+                                noFit();
+                            });
+                        }
+                        else
+                        {
+                            //Oui, on l'affiche
+                            printAd();
+                        }
+                    }
+                    else
+                    {
+                        //Les dates ne correspondent pas
+                        noFit();
+                    }
+                }
+                else
+                {
+                    //Non
+                    crash();
+                }
+            }
+            
+            function noFit()
+            {
+                //L'affichage de l'image est-il terminé ?
+                if(data.plays[toPlay].end < Date.now())
+                {
+                    //Oui, l'image est-elle en mémoire?
+                    if (localStorage.getItem("play"+data.plays[toPlay].id) !== null) 
+                    {
+                        //Oui, alors on la supprime
+                        localStorage.removeItem("play"+data.plays[toPlay].id);
+                    }
+                }
+
+                //Non, on regarde combien on fait d'essais
+                trys++;
+
+                if(trys == data.plays.length)
+                {
+                    //Aucun image ne peut être afficher pour le moment
+                    crash();
+                }
+                else
+                {
+                    //On tente la suivante
+                    localStorage.setItem("lastPlayed"+hash, toPlay);
+                    displayAd();
+                }
+            }
+            
+            function printAd()
+            {
+                img = LZString.decompressFromUTF16(localStorage.getItem("play"+data.plays[toPlay].id));
+                
+                //On met a jour la date de suppression
+                playDates[data.plays[toPlay].id] = Date.now() + 24*60*60*1000;
+                
+                //On incremente le compteur
+                data.plays[toPlay].display++;
+                localStorage.setItem("spotData"+hash, JSON.stringify(data));
+                
+                localStorage.setItem("lastPlayed"+hash, toPlay);
+                $("#MainPict").attr('src', img);
+                
+                deletePlays()
+            }
+            
+            function crash()
+            {
+                if(defaultAd != "")
+                {
+                    $("#MainPict").attr('src', defaultAd);
+                }
+            }
+            
+            function deletePlays()
+            {
+                var now = new Date();
+                
+                if (localStorage.getItem("nextClean") === null) 
+                {
+                    now.addDays(7);
+                    localStorage.setItem("nextClean", now);
+                    log("SET NEXT CLEAN DATE : "+now);
+                
+                    $.each(playDates, function (playID, expireDate){
+                       console.log(expireDate, Date.now());
+
+                        if(expireDate < Date.now())
+                        {
+                            delete playDates[playID];
+
+                            if (localStorage.getItem("play"+playID) !== null) 
+                            {
+                                localStorage.removeItem("play"+playID);
+                            }
+                        }
+                    });
+
+                    localStorage.setItem("playDates", JSON.stringify(playDates));
+                }    
+                else if(localStorage.getItem("nextClean") < now.getTime())
+                {
+                    //console.log(localStorage.getItem("nextClean"), now.getTime());
+                    //Nettoyage violent 
+                    localStorage.clear();     
+                    log("LOCAL STORAGE EMPTYED");
+                }
+            }
+		</script>
+		<script>            
+			var timeRefresh = 15;
+			var urlServer = "http://'.$_SERVER['HTTP_HOST'].'/";
+			var hash = '.$spotID.';
+			var target = '.$targetID.';
+			var defaultAd = "'.$default.'"
+
+			function start() 
+			{ 
+				if (localStorage.getItem("spotData"+hash) === null) 
+				{ 
+					updateData(false); 
+				} 
+				else 
+				{ 
+					startDisplay(); 
+				} 
+			} 
+
+			start();
+		</script>
+	</body>
+</html>

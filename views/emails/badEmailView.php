@@ -1,0 +1,1 @@
+<center><?php echo \__("badEmailText"); ?></center>

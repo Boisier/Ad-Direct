@@ -1,0 +1,23 @@
+#loadContainer
+{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    height: 508px;
+}
+
+#smallLoadContainer
+{
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 30px 0;
+}
+
+#loadContainer i,
+#smallLoadContainer i
+{
+    display: block;
+    margin: auto;
+    color: $mainColor;
+}

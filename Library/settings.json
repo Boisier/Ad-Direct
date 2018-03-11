@@ -1,0 +1,28 @@
+{
+	"database":
+	{
+		"host": "localhost",
+		"user": "addirect_webapp",
+		"password": "3tN-A2y-NCV-oNh",
+		"dbType": "mysql",
+		"dbName": "addirect_main"
+	},
+
+	"debug": false,
+	"domain": "ad-direct.ca",
+
+	"ffmpeg":
+	{
+		"ffmpeg": "/home/addirect/bin/ffmpeg",
+		"ffprobe": "/home/addirect/bin/ffprobe"
+	},
+
+	"smtp":
+	{
+		"host": "ad-direct.ca",
+		"port": "465",
+		"encryption": "ssl",
+		"username": "noreply@ad-direct.ca",
+		"password": "aQ2-ZV8-maL-rkJ"
+	}
+}
