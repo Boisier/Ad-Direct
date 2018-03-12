@@ -9,7 +9,7 @@ use Objects\Ad;
 use Objects\Record;
 
 class CreativeController
-{	
+{
 	const CREATIVE_KO = 0;
 	const CREATIVE_OK = 1;
 	const CREATIVE_PROCESSING = 2;
@@ -25,7 +25,7 @@ class CreativeController
 	/**
 	 * Print the needed form to interact with the creative
 	 * @param string  $formName The name of the form
-	 * @param integer $adID     The Combo ID that 
+	 * @param integer $adID     The Combo ID that
 	 * @param integer $screenID identify the creative
 	 */
 	public function form($formName, $adID, $screenID)
@@ -53,13 +53,12 @@ class CreativeController
 	
 	
 	
-	
 	/**
 	 * Add a new creative
 	 * @param integer $adID     The Ad the creative belong to
 	 * @param integer $screenID The screen the creative is printed on
 	 */
-	public function add($adID, $screenID) 
+	public function add($adID, $screenID)
 	{
 		$_record = Record::createRecord(Record::CREATIVE_UPLOADED);
 		
@@ -71,7 +70,7 @@ class CreativeController
 		}
 		
 		//Do we have the file?
-		if(!array_key_exists("creative", $_FILES)) 
+		if(!array_key_exists("creative", $_FILES))
 		{
 			$_record->setResult(Record::FATAL_ERROR)
 					->setMessage("Missing creative")
@@ -109,7 +108,7 @@ class CreativeController
 		$ad = \Objects\Ad::getInstance($adID);
 		$specs = $ad->getScreenSpecs($screenID);
 		
-		//Parse the file, look for errors, 
+		//Parse the file, look for errors,
 		//and make sure it fits the screen and campaigns specs.
 		$errors = $this->controlCreative($_FILES['creative'], $specs);
 		
@@ -196,8 +195,8 @@ class CreativeController
 		}
 		
 		
-		//MORE Treatments according to media type	
-		switch($creativeMediaType) 
+		//MORE Treatments according to media type
+		switch($creativeMediaType)
 		{
 			case 1:
 				//This is a picture
@@ -223,7 +222,7 @@ class CreativeController
 				
 				
 				//Retrieve video infos
-				$videoStream = $ffprobe->streams($file['tmp_name'])->videos()->first(); //Select the video  
+				$videoStream = $ffprobe->streams($file['tmp_name'])->videos()->first(); //Select the video
 				$fileInformations = $ffprobe->format($file['tmp_name']);
 				
 				/*print_r(["codec_name" => $videoStream->get("codec_name"),
@@ -324,7 +323,7 @@ class CreativeController
 	/**
 	 * Create the modal to display the creative
 	 * @param integer $adID     Combo ID
-	 * @param integer $screenID 
+	 * @param integer $screenID
 	 */
 	public function display($adID, $screenID)
 	{
