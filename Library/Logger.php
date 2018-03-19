@@ -137,6 +137,6 @@ class Logger implements \Psr\Log\LoggerInterface
      */
     public function log($level, $message, array $context = array())
     {
-	    file_put_contents($this->path, "[$level] [" . time() . "] $message : [" . join(", ", $context) . "]\n", FILE_APPEND);
+	    file_put_contents($this->path, "[$level] [" . date("c", time()) . "] $message : [" . join(", ", $context) . "]\n", FILE_APPEND);
     }
 }

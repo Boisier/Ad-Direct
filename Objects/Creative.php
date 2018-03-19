@@ -13,7 +13,7 @@ class Creative
 	
 	/**
 	 * Try to instantiate a Creative Object by its id or Combo ID
-	 * @param  integer $creativeID Id of the creative
+	 * @param  integer $refID Id of the creative
 	 * @return mixed   a Screen object on success, false otherwise
 	 */
 	public static function getInstance($refID, $screenID = 0)
@@ -103,7 +103,7 @@ class Creative
 	
 	
 	public function getPath($rooted = false)
-	{	
+	{
 		return $this->creativeModel->path($rooted);
 	}
 	
@@ -265,7 +265,7 @@ class Creative
 	
 	
 	
-	public function updateExtension($newExtension)	
+	public function updateExtension($newExtension)
 	{
 		$this->creativeModel->setNewExtension($newExtension);
 	}
@@ -343,7 +343,7 @@ class Creative
 	 * Do not use save after
 	 */
 	public function delete()
-	{	
+	{
 		
 		//Remove files
 		$path = $this->getPath(false);
