@@ -10,37 +10,36 @@ class BroadcastergroupController
 {
 	/**
 	 * Print the needed form to interact with the broadcaster
-	 * @param string  $formName            The name of the form
+	 * @param string $formName The name of the form
 	 * @param integer [$broadcasterID      = 0] The broadcaster ID
 	 */
-	public function form($formName, $broadcasterGroupID = 0) 
+	public function form ($formName, $broadcasterGroupID = 0)
 	{
 		\Library\User::restricted("MANAGE_CLIENTS");
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "create":
 				
 				//Get the view
 				$form = new View("broadcasterGroups/add");
-				
+			
 			break;
 			case "rename":
 			case "delete":
 				
 				//Get the view
-				$form = new View("broadcasterGroups/".$formName);
+				$form = new View("broadcasterGroups/" . $formName);
 				
 				//Retrieve needed infos
 				$broadcasterGroupID = Sanitize::int($broadcasterGroupID);
-		
+				
 				$model = new \Models\BroadcasterGroupModel();
 				$broadcasterGroup = $model->getInfos($broadcasterGroupID);
 				
 				//Attach the infos
 				$form->groupID = $broadcasterGroup['ID'];
 				$form->groupName = $broadcasterGroup['name'];
-				
+			
 			break;
 		}
 		
@@ -48,11 +47,7 @@ class BroadcastergroupController
 	}
 	
 	
-	
-	
-	
-	
-	public function home()
+	public function home ()
 	{
 		\Library\User::restricted("MANAGE_CLIENTS");
 		
@@ -60,7 +55,7 @@ class BroadcastergroupController
 		
 		$view = new View("broadcasterGroups/home");
 		$view->broadcasterGroups = $broadcasterGroupModel->getAll();
-			
+		
 		echo $view->render();
 	}
 	
@@ -68,21 +63,19 @@ class BroadcastergroupController
 	/**
 	 * Create a new Broadcaster Group
 	 */
-	public function create()
+	public function create ()
 	{
 		$_record = Record::createRecord(Record::BROADCASTER_GROUP_CREATED);
 		
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
-		if(empty($_POST['name']))
-		{
+		if (empty($_POST['name'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing field")
-					->save();
+				->setMessage("Missing field")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -93,11 +86,10 @@ class BroadcastergroupController
 		
 		$model = new \Models\BroadcasterGroupModel();
 		
-		if($model->broadcasterGroupExistName($broadcasterGroupName))
-		{
+		if ($model->broadcasterGroupExistName($broadcasterGroupName)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("New broadcaster group name is already in use")
-					->save();
+				->setMessage("New broadcaster group name is already in use")
+				->save();
 			
 			http_response_code(400);
 			echo "alreadyExist";
@@ -107,8 +99,8 @@ class BroadcastergroupController
 		$broadcasterGroupID = $model->create($broadcasterGroupName);
 		
 		$_record->setRef1($broadcasterGroupID)
-				->setResult(Record::OK)
-				->save();
+			->setResult(Record::OK)
+			->save();
 		
 		$this->home();
 	}
@@ -118,27 +110,25 @@ class BroadcastergroupController
 	 * Update the broadcaster group
 	 * @param $groupID
 	 */
-	public function update($groupID)
+	public function update ($groupID)
 	{
 		$groupID = Sanitize::int($groupID);
 		
 		$_record = Record::createRecord(Record::BROADCASTER_GROUP_UPDATED);
 		$_record->setRef1($groupID);
 		
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
 		/*Did we received everything ?*/
-		if(empty($_POST['name']))
-		{
+		if (empty($_POST['name'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing Field")
-					->save();
+				->setMessage("Missing Field")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -150,11 +140,10 @@ class BroadcastergroupController
 		$model = new \Models\BroadcasterGroupModel();
 		
 		/*Can we use this name ?*/
-		if($groupName != $model->getInfos($groupID)["name"] && $model->broadcasterGroupExistName($groupName))
-		{
+		if ($groupName != $model->getInfos($groupID)["name"] && $model->broadcasterGroupExistName($groupName)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("New name already in use")
-					->save();
+				->setMessage("New name already in use")
+				->save();
 			
 			http_response_code(400);
 			echo "alreadyExist";
@@ -165,23 +154,22 @@ class BroadcastergroupController
 		$model->setName($groupID, $groupName);
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$this->home();
 	}
 	
 	
-	public function delete($groupID)
+	public function delete ($groupID)
 	{
 		$groupID = Sanitize::int($groupID);
 		
 		$_record = Record::createRecord(Record::BROADCASTER_GROUP_REMOVED);
 		$_record->setRef1($groupID);
 		
-		if(\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}

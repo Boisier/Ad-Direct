@@ -16,21 +16,16 @@ class ReviewController
 	const AD_AUTO_APPROVED = 4;
 	
 	
-	
-	
-	
-	
 	/**
 	 * Print the needed form to interact with the broadcaster
-	 * @param string  $formName            The name of the form
+	 * @param string $formName The name of the form
 	 * @param integer [$broadcasterID      = 0] The broadcaster ID
 	 */
-	public function form($formName, $adID, $action = 0) 
+	public function form ($formName, $adID, $action = 0)
 	{
 		\Library\User::restricted("APPROVE_CREATIVES");
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "review":
 				
 				//Get the view
@@ -43,7 +38,7 @@ class ReviewController
 				//Attach the infos
 				$form->adID = $adID;
 				$form->action = $action;
-				
+			
 			break;
 		}
 		
@@ -51,14 +46,11 @@ class ReviewController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Insert a new review, if possible, for the given ad
 	 * @param integer $adID The ad to ork with
 	 */
-	public function createReview($adID)
+	public function createReview ($adID)
 	{
 		//First let's see if the ad is complete
 		$ad = \Objects\Ad::getInstance($adID);
@@ -66,7 +58,7 @@ class ReviewController
 		$nbrScreens = $ad->getNbrScreens();
 		$nbrCreatives = $ad->getNbrCreatives();
 		
-		if($nbrCreatives != $nbrScreens)
+		if ($nbrCreatives != $nbrScreens)
 			return; //Ads are missing, no review for now
 		
 		//The Ad is complete
@@ -75,39 +67,32 @@ class ReviewController
 		$reviewerID = NULL;
 		$reviewedDate = 0;
 		
-		if(\Library\User::isAdmin())
-		{
+		if (\Library\User::isAdmin()) {
 			$reviewStatus = ReviewController::AD_APPROVED;
 			$reviewerID = \Library\User::id();
 			$reviewedDate = time();
-		}
-		else if(\Library\User::restricted("TRUSTED_CLIENT", true))
-		{
+		} else if (\Library\User::restricted("TRUSTED_CLIENT", true)) {
 			$reviewStatus = ReviewController::AD_AUTO_APPROVED;
 			$reviewerID = \Library\User::id();
 			$reviewedDate = time();
 		}
-		 
+		
 		$reviewModel = new \Models\ReviewModel();
 		$reviewModel->create($adID, $reviewStatus, $reviewerID, $reviewedDate);
 		
-		if($reviewerID == NULL)
-		{
+		if ($reviewerID == NULL) {
 			$emailController = new EmailController();
 			$emailController->create(EmailController::EMAIL_REVIEW_AD, $adID);
 		}
 	}
 	
 	
-	
-	
-	public function validate()
+	public function validate ()
 	{
 		\Library\User::restricted("APPROVE_CREATIVES");
 		
 		//Exclude any possible errors
-		if(empty($_POST['adID']) ||empty($_POST['action']))
-		{
+		if (empty($_POST['adID']) || empty($_POST['action'])) {
 			http_response_code(400);
 			echo "fatalError";
 			return;
@@ -117,12 +102,11 @@ class ReviewController
 		$action = Sanitize::string($_POST['action']);
 		$comment = Sanitize::string($_POST['comment']);
 		
-		if($action == "approve")
+		if ($action == "approve")
 			$newStatus = self::AD_APPROVED;
-		else if($action == "reject")
-			$newStatus = self::AD_REJECTED; 
-		else
-		{
+		else if ($action == "reject")
+			$newStatus = self::AD_REJECTED;
+		else {
 			http_response_code(400);
 			echo "fatalError";
 			return;
@@ -133,8 +117,7 @@ class ReviewController
 		
 		$ad = \Objects\Ad::getInstance($adID);
 		
-		if($ad == false)
-		{
+		if ($ad == false) {
 			$homeController = new HomeController();
 			$homeController->clients();
 		}

@@ -18,23 +18,18 @@ class CreativeController
 	const CREATIVE_NEED_CONVERT_RETRY = 5;
 	
 	
-	
-	
-	
-	
 	/**
 	 * Print the needed form to interact with the creative
 	 * @param string  $formName The name of the form
 	 * @param integer $adID     The Combo ID that
 	 * @param integer $screenID identify the creative
 	 */
-	public function form($formName, $adID, $screenID)
+	public function form ($formName, $adID, $screenID)
 	{
 		$adID = Sanitize::int($adID);
 		$screenID = Sanitize::int($screenID);
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "delete":
 				
 				$form = new View("modals/deleteCreative");
@@ -43,7 +38,7 @@ class CreativeController
 				$creativeModel->setCreativeByComboID($adID, $screenID);
 				
 				$form->creativeID = $creativeModel->id();
-				
+			
 			break;
 		}
 		
@@ -51,30 +46,26 @@ class CreativeController
 	}
 	
 	
-	
-	
 	/**
 	 * Add a new creative
 	 * @param integer $adID     The Ad the creative belong to
 	 * @param integer $screenID The screen the creative is printed on
 	 */
-	public function add($adID, $screenID)
+	public function add ($adID, $screenID)
 	{
 		$_record = Record::createRecord(Record::CREATIVE_UPLOADED);
 		
 		//Authorizations
-		if(!\Library\User::canEditAd($adID))
-		{
+		if (!\Library\User::canEditAd($adID)) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
 		//Do we have the file?
-		if(!array_key_exists("creative", $_FILES))
-		{
+		if (!array_key_exists("creative", $_FILES)) {
 			$_record->setResult(Record::FATAL_ERROR)
-					->setMessage("Missing creative")
-					->save();
+				->setMessage("Missing creative")
+				->save();
 			
 			//display errors
 			$errorModal = new View("modals/uploadErrors");
@@ -94,11 +85,10 @@ class CreativeController
 		$creativeModel = new \Models\CreativeModel();
 		
 		//Is there already an ad here ?
-		if($creativeModel->existComboID($adID, $screenID))
-		{
+		if ($creativeModel->existComboID($adID, $screenID)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Creative already present")
-					->save();
+				->setMessage("Creative already present")
+				->save();
 			
 			return; //Cannot add if there's already something here
 			//So we just stop the upload here, without doing anything.
@@ -113,11 +103,10 @@ class CreativeController
 		$errors = $this->controlCreative($_FILES['creative'], $specs);
 		
 		//Treat any errors
-		if(count($errors) != 0)
-		{
+		if (count($errors) != 0) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Creative did not match format")
-					->save();
+				->setMessage("Creative did not match format")
+				->save();
 			
 			//display errors
 			$errorModal = new View("modals/uploadErrors");
@@ -145,19 +134,16 @@ class CreativeController
 		
 		//Create thumnails, check if it needs to be converted, reviewed, etc.
 		$this->processCreative($creative, $creativeMediaType);
-
+		
 		//And return what to show in place on the ad block
 		$adController = new \Controllers\AdController();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		header('Content-Type: application/json');
 		echo json_encode(["success" => true, "html" => $adController->buildBlock($ad->getID())->render()]);
 	}
-	
-	
-	
 	
 	
 	/**
@@ -166,13 +152,12 @@ class CreativeController
 	 * @param $specs
 	 * @return array
 	 */
-	public function controlCreative($file, $specs)
+	public function controlCreative ($file, $specs)
 	{
 		$errors = [];
 		
 		//Error while uploading ?
-		if($file['error'] != 0)
-		{
+		if ($file['error'] != 0) {
 			array_push($errors, "ERROR_UPLOAD");
 			return $errors;
 		}
@@ -181,23 +166,21 @@ class CreativeController
 		//Check file size
 		$sizeInBytes = 1048576 * $specs['sizeLimit'];
 		
-		if($file['size'] > $sizeInBytes)
+		if ($file['size'] > $sizeInBytes)
 			array_push($errors, "TOO_HEAVY");
 		
 		//Validate media type
 		$creativeMediaType = $this->getCreativeMediaType($_FILES['creative']['tmp_name']);
 		
 		//If creative media type is not supported by ad ad-direct, or is not supported by this screen
-		if($creativeMediaType == 0 || ($creativeMediaType != $specs['mediaType'] && $specs['mediaType'] != 0))
-		{
+		if ($creativeMediaType == 0 || ($creativeMediaType != $specs['mediaType'] && $specs['mediaType'] != 0)) {
 			array_push($errors, "WRONG_MIME");
 			return $errors;
 		}
 		
 		
 		//MORE Treatments according to media type
-		switch($creativeMediaType)
-		{
+		switch ($creativeMediaType) {
 			case 1:
 				//This is a picture
 				
@@ -205,13 +188,13 @@ class CreativeController
 				$dimensions = getimagesize($file['tmp_name']);
 				$ratio = $dimensions[0] / $dimensions[1];
 				
-				if($ratio != $specs['width'] / $specs['height'] || //Aspect ration
+				if ($ratio != $specs['width'] / $specs['height'] || //Aspect ration
 					$dimensions[0] < $specs['width'] || //Minimum dimensions
 					$dimensions[1] < $specs['height'] ||
 					$dimensions[0] > 2 * $specs['width'] || //Maximum dimensions
 					$dimensions[1] > 2 * $specs['height'])
 					array_push($errors, "BAD_DIMENSIONS");
-				
+			
 			break;
 			case 2:
 				
@@ -232,27 +215,27 @@ class CreativeController
 						 "duration" => $fileInformations->get("duration")]);*/
 				
 				//Check video codec
-				if(!in_array($videoStream->get("codec_name"), $authorizedCodecs))
+				if (!in_array($videoStream->get("codec_name"), $authorizedCodecs))
 					array_push($errors, "BAD_CODEC");
 				
 				
 				//Check video dimensions
-				if($videoStream->get("width") != $specs['width'] || $videoStream->get("height") != $specs['height'])
+				if ($videoStream->get("width") != $specs['width'] || $videoStream->get("height") != $specs['height'])
 					array_push($errors, "BAD_DIMENSIONS");
 				
 				
 				//Check framerate
 				$framerate = \Library\FFMpeg::fracToFloat($videoStream->get("r_frame_rate"));
-				if($framerate < 23.9 || $framerate > 30)
-                	array_push($errors, 'BAD_FRAMERATE');
+				if ($framerate < 23.9 || $framerate > 30)
+					array_push($errors, 'BAD_FRAMERATE');
 				
 				
 				//Check length
 				$maxDuration = $specs["displayDuration"] + 1; //Add 1 second offset
 				
-				if($fileInformations->get("duration") > $maxDuration)
-                	array_push($errors, 'TOO_LONG');
-				
+				if ($fileInformations->get("duration") > $maxDuration)
+					array_push($errors, 'TOO_LONG');
+			
 			break;
 		}
 		
@@ -260,10 +243,7 @@ class CreativeController
 	}
 	
 	
-	
-	
-	
-	private function getFileMimeType($path)
+	private function getFileMimeType ($path)
 	{
 		$finfo = \finfo_open(FILEINFO_MIME_TYPE);
 		$mime = finfo_file($finfo, $path);
@@ -273,12 +253,7 @@ class CreativeController
 	}
 	
 	
-	
-	
-	
-	
-	
-	private function getCreativeMediaType($path)
+	private function getCreativeMediaType ($path)
 	{
 		$mimeType = $this->getFileMimeType($path);
 		
@@ -287,22 +262,17 @@ class CreativeController
 	}
 	
 	
-	
-	
-	
-	
 	/**
 	 * @param \Objects\Creative $creative
-	 * @param int $creativeMediaType
+	 * @param int               $creativeMediaType
 	 */
-	private function processCreative($creative, $creativeMediaType)
+	private function processCreative ($creative, $creativeMediaType)
 	{
 		//Create thumbnail for the creative
 		$creative->createThumbnail();
 		
 		//Set status depending on media type
-		switch($creativeMediaType)
-		{
+		switch ($creativeMediaType) {
 			case 1: //Picture
 				$creative->setStatus(self::CREATIVE_OK);
 			break;
@@ -317,18 +287,15 @@ class CreativeController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Create the modal to display the creative
-	 * @param integer $adID     Combo ID
+	 * @param integer $adID Combo ID
 	 * @param integer $screenID
 	 */
-	public function display($adID, $screenID)
+	public function display ($adID, $screenID)
 	{
 		//Authorizations
-		if(!\Library\User::canEditAd($adID))
+		if (!\Library\User::canEditAd($adID))
 			return;
 		
 		$adID = Sanitize::int($adID);
@@ -345,14 +312,11 @@ class CreativeController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Delete the creative
 	 * @param integer $creativeID The creative to delete
 	 */
-	public function delete($creativeID)
+	public function delete ($creativeID)
 	{
 		$creativeID = Sanitize::int($creativeID);
 		
@@ -363,10 +327,9 @@ class CreativeController
 		$ad = $creative->getAd();
 		
 		//Authorizations
-		if(!\Library\User::canEditAd($ad->getID()))
-		{
+		if (!\Library\User::canEditAd($ad->getID())) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
@@ -379,7 +342,7 @@ class CreativeController
 		$creative->delete();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$campaignController = new CampaignController();
 		$campaignController->display($ad->getCampaign()->getID());

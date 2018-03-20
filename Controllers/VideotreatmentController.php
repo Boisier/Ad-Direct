@@ -6,20 +6,18 @@ use Objects\Record;
 
 class VideotreatmentController
 {
-	public function processVideos()
+	public function processVideos ()
 	{
 		echo "Starting video treatment<br>";
 		
 		$videoTreatmentModel = new \Models\VideoTreatmentModel();
 		
 		//FIrst, check if there is already a video beiing converted
-		if($videoTreatmentModel->alreadyConverting())
-		{
+		if ($videoTreatmentModel->alreadyConverting()) {
 			echo "A video is already converting.<br>";
 			echo "Check for error<br>";
 			
-			if(time() - \Library\Params::get("LAST_CONVERSION_START") < 1800)
-			{
+			if (time() - \Library\Params::get("LAST_CONVERSION_START") < 1800) {
 				echo "No errors. END<br>";
 				return;
 			}
@@ -37,8 +35,7 @@ class VideotreatmentController
 		$paramModel->updateGlobal("LAST_CONVERSION_START", time());
 		
 		//Is there any video to convert
-		if(count($videosID) == 0)
-		{
+		if (count($videosID) == 0) {
 			echo "There is no video to convert. END<br>";
 			return;
 		}
@@ -68,17 +65,14 @@ class VideotreatmentController
 		echo "Starting conversion.<br>";
 		$startTime = time();
 		
-		try
-		{
+		try {
 			//Load ffmpeg and the video
 			$ffmpeg = $ffmpeg = \Library\FFMpeg::getFFMpegInstance();
 			$video = $ffmpeg->open($sourcePath);
 			
 			//Convert the video
 			$video->save($format, $destinationPath);
-		}
-		catch(\Exception $e)
-		{
+		} catch (\Exception $e) {
 			//Conversion failed
 			//Mark as retry
 			
@@ -92,7 +86,7 @@ class VideotreatmentController
 		
 		//Check conversion is OK
 		//Check VIA file size
-		if(filesize($destinationPath) == 0) {
+		if (filesize($destinationPath) == 0) {
 			//File size is empty, the conversion needs to be done again
 			echo "Conversion failed by file size. END<br>";
 			$creative->setStatus(\Controllers\CreativeController::CREATIVE_NEED_CONVERT_RETRY);
@@ -115,29 +109,22 @@ class VideotreatmentController
 		$duration = $endTime - $startTime;
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		echo "Conversion time : $duration s";
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	private function getDestinationFormat($creative)
+	private function getDestinationFormat ($creative)
 	{
 		$format = new \FFMpeg\Format\Video\WebM();
 		
 		//Add the progress monitor
-		$format->on('progress', function ($video, $format, $percentage) use ($creative)
-		{
+		$format->on('progress', function ($video, $format, $percentage) use ($creative) {
 			//echo "$percentage % transcoded<br>";
 			$creative->setConversionStatus($percentage);
 		});
-    	
+		
 		//We don't want any audio
 		//TODO: Remove audio
 		

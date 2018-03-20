@@ -8,18 +8,17 @@ use Objects\Record;
 
 class ScreenController
 {
-	public function form($formName, $ID = 0) 
+	public function form ($formName, $ID = 0)
 	{
 		\Library\User::restricted("EDIT_SUPPORTS");
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "add":
 				
 				$form = new View("screens/add");
 				
 				$form->supportID = \Library\Sanitize::int($ID);
-				
+			
 			break;
 			case "edit":
 			case "delete":
@@ -32,33 +31,30 @@ class ScreenController
 				$form->screenName = $screen->getName();
 				$form->screenWidth = $screen->getWidth();
 				$form->screenHeight = $screen->getHeight();
-				
+			
 			break;
 		}
 		
 		echo $form->render();
-	} 
+	}
 	
 	
-	
-	public function add($supportID)
+	public function add ($supportID)
 	{
 		$supportID = \Library\Sanitize::int($supportID);
 		
 		$_record = Record::createRecord(Record::SCREEN_CREATED);
 		$_record->setRef2($supportID);
 		
-		if(!\Library\User::hasPrivilege("EDIT_SUPPORTS"))
-		{
+		if (!\Library\User::hasPrivilege("EDIT_SUPPORTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
-		if(empty($_POST['screenWidth']) || empty($_POST['screenHeight']))
-		{
+		if (empty($_POST['screenWidth']) || empty($_POST['screenHeight'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing fields")
-					->save();
+				->setMessage("Missing fields")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -73,8 +69,8 @@ class ScreenController
 		$screenID = $screenModel->add($supportID, $screenName, $screenWidth, $screenHeight);
 		
 		$_record->setResult(Record::OK)
-				->setRef1($screenID)
-				->save();
+			->setRef1($screenID)
+			->save();
 		
 		$supportController = new SupportController();
 		$supportController->display($supportID);
@@ -84,24 +80,22 @@ class ScreenController
 	/**
 	 * @param $screenID
 	 */
-	public function edit($screenID)
+	public function edit ($screenID)
 	{
 		$screen = \Objects\Screen::getInstance($screenID);
 		
 		$_record = Record::createRecord(Record::SCREEN_UPDATED);
 		$_record->setRef1($screen->getID());
 		
-		if(!\Library\User::hasPrivilege("EDIT_SUPPORTS"))
-		{
+		if (!\Library\User::hasPrivilege("EDIT_SUPPORTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
-		if(empty($_POST['screenWidth']) || empty($_POST['screenHeight']))
-		{
+		if (empty($_POST['screenWidth']) || empty($_POST['screenHeight'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing fields")
-					->save();
+				->setMessage("Missing fields")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -113,12 +107,12 @@ class ScreenController
 		$screenHeight = \Library\Sanitize::string($_POST['screenHeight']);
 		
 		$screen->setName($screenName)
-			   ->setWidth($screenWidth)
-			   ->setHeight($screenHeight)
-			   ->save();
+			->setWidth($screenWidth)
+			->setHeight($screenHeight)
+			->save();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$supportID = $screen->getSupportID();
 		
@@ -127,18 +121,16 @@ class ScreenController
 	}
 	
 	
-	
-	public function delete($screenID)
+	public function delete ($screenID)
 	{
 		$screenID = \Library\Sanitize::int($screenID);
 		
 		$_record = Record::createRecord(Record::SCREEN_REMOVED);
 		$_record->setRef1($screenID);
 		
-		if(!\Library\User::hasPrivilege("EDIT_SUPPORTS"))
-		{
+		if (!\Library\User::hasPrivilege("EDIT_SUPPORTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
@@ -146,11 +138,10 @@ class ScreenController
 		$screen = \Objects\Screen::getInstance($screenID);
 		$support = $screen->getSupport();
 		
-		if($support->isUsed())
-		{
+		if ($support->isUsed()) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Cannot remove screen if support is used")
-					->save();
+				->setMessage("Cannot remove screen if support is used")
+				->save();
 			
 			$view = new View("screens/cannotDeleteScreen");
 			$view->supportID = $support->getID();
@@ -163,7 +154,7 @@ class ScreenController
 		$screen->delete();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$supportController = new SupportController();
 		$supportController->display($support->getID());

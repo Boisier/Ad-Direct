@@ -69,7 +69,7 @@ class CreativeModel
 	{
 		return $this->exist($creativeID);
 	}
-	 
+	
 	
 	
 	
@@ -137,12 +137,12 @@ class CreativeModel
 			return false;
 		
 		$stmt = $this->ddb->prepare("
-			SELECT 
-				creative_id as ID 
-			FROM 
-				creatives 
-			WHERE 
-				ad_id = :adID AND 
+			SELECT
+				creative_id as ID
+			FROM
+				creatives
+			WHERE
+				ad_id = :adID AND
 				screen_id = :screenID
 		");
 		$stmt->execute([":adID" => $adID,
@@ -154,19 +154,19 @@ class CreativeModel
 	
 	
 	public function infos()
-	{	
+	{
 		$stmt = $this->ddb->prepare("
-			SELECT 
-				creative_id as ID, 
-				ad_id as adID, 
-				user_id as userID, 
-				screen_id as screenID, 
-				creative_name as name, 
-				creative_extension as extension, 
-				creative_upload_time as uploadTime 
-			FROM 
-				creatives 
-			WHERE 
+			SELECT
+				creative_id as ID,
+				ad_id as adID,
+				user_id as userID,
+				screen_id as screenID,
+				creative_name as name,
+				creative_extension as extension,
+				creative_upload_time as uploadTime
+			FROM
+				creatives
+			WHERE
 				creative_id = :creativeID
 		");
 		$stmt->execute([":creativeID" => $this->currentCreative]);
@@ -186,25 +186,25 @@ class CreativeModel
 		
 		//Insert the new creative in the database
 		$stmt = $this->ddb->prepare("
-			INSERT INTO 
+			INSERT INTO
 				creatives(
-					ad_id, 
-					screen_id, 
-					media_type, 
-					user_id, 
-					creative_name, 
-					creative_extension, 
+					ad_id,
+					screen_id,
+					media_type,
+					user_id,
+					creative_name,
+					creative_extension,
 					creative_upload_time,
 					creative_status
 				)
 			VALUES(
-				:adID, 
-				:screenID, 
-				:mediaType, 
-				:userID, 
-				:name, 
-				:extension, 
-				:uploadTime, 
+				:adID,
+				:screenID,
+				:mediaType,
+				:userID,
+				:name,
+				:extension,
+				:uploadTime,
 				:creativeStatus
 			)
 		");
@@ -253,10 +253,10 @@ class CreativeModel
 	public function thumbPath($rooted)
 	{
 		$stmt = $this->ddb->prepare("
-			SELECT 
-				creatives.creative_extension as extension 
-			FROM 
-				creatives 
+			SELECT
+				creatives.creative_extension as extension
+			FROM
+				creatives
 			WHERE
 				creatives.creative_id = :creativeID
 		");
@@ -277,13 +277,13 @@ class CreativeModel
 	
 	
 	public function delete()
-	{	
+	{
 		//Remove entry in ddb
 		$stmt = $this->ddb->prepare("DELETE FROM creatives WHERE creative_id = :creativeID");
 		$stmt->execute([":creativeID" => $this->currentCreative]);
 		
 		$this->currentCreative = NULL;
-	}	
+	}
 	
 	
 	
@@ -449,19 +449,19 @@ class CreativeModel
 	public function getConvertedVideoPath($rooted)
 	{
 		$stmt = $this->ddb->prepare("
-			SELECT 
-				creatives.screen_id as screenID, 
-				ads.ad_uid as adUID, 
-				campaigns.campaign_uid as campaignUID 
-			FROM 
-				creatives 
-				JOIN 
-					ads ON 
-					creatives.ad_id = ads.ad_id 
-				JOIN 
-					campaigns ON 
-					ads.campaign_id = campaigns.campaign_id 
-			WHERE 
+			SELECT
+				creatives.screen_id as screenID,
+				ads.ad_uid as adUID,
+				campaigns.campaign_uid as campaignUID
+			FROM
+				creatives
+				JOIN
+					ads ON
+					creatives.ad_id = ads.ad_id
+				JOIN
+					campaigns ON
+					ads.campaign_id = campaigns.campaign_id
+			WHERE
 				creatives.creative_id = :creativeID
 		");
 		$stmt->execute([":creativeID" => $this->currentCreative]);
@@ -485,20 +485,20 @@ class CreativeModel
 	public function getOriginalVideoPath($rooted)
 	{
 		$stmt = $this->ddb->prepare("
-			SELECT 
-				creatives.creative_original_extension as extension, 
-				creatives.screen_id as screenID, 
-				ads.ad_uid as adUID, 
-				campaigns.campaign_uid as campaignUID 
-			FROM 
-				creatives 
-				JOIN 
-					ads ON 
-					creatives.ad_id = ads.ad_id 
-				JOIN 
-					campaigns ON 
-					ads.campaign_id = campaigns.campaign_id 
-			WHERE 
+			SELECT
+				creatives.creative_original_extension as extension,
+				creatives.screen_id as screenID,
+				ads.ad_uid as adUID,
+				campaigns.campaign_uid as campaignUID
+			FROM
+				creatives
+				JOIN
+					ads ON
+					creatives.ad_id = ads.ad_id
+				JOIN
+					campaigns ON
+					ads.campaign_id = campaigns.campaign_id
+			WHERE
 				creatives.creative_id = :creativeID
 		");
 		$stmt->execute([":creativeID" => $this->currentCreative]);
@@ -519,7 +519,7 @@ class CreativeModel
 	public function setNewExtension($newExtension)
 	{
 		$stmt = $this->ddb->prepare("
-			SELECT 
+			SELECT
 				creative_extension
 			FROM
 				creatives

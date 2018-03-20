@@ -12,15 +12,14 @@ class BroadcasterController
 {
 	/**
 	 * Print the needed form to interact with the broadcaster
-	 * @param string  $formName            The name of the form
+	 * @param string $formName The name of the form
 	 * @param integer [$broadcasterID      = 0] The broadcaster ID
 	 */
-	public function form($formName, $broadcasterID = 0) 
+	public function form ($formName, $broadcasterID = 0)
 	{
 		\Library\User::restricted("MANAGE_CLIENTS");
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "add":
 				
 				//Get the view
@@ -28,13 +27,13 @@ class BroadcasterController
 				
 				$broadcasterGroupModel = new \Models\BroadcasterGroupModel();
 				$form->broadcasterGroups = $broadcasterGroupModel->getAll();
-				
+			
 			break;
 			case "edit":
 			case "delete":
 				
 				//Get the view
-				$form = new \Library\View("broadcasters/".$formName."Form");
+				$form = new \Library\View("broadcasters/" . $formName . "Form");
 				
 				//Retrieve needed infos
 				$broadcaster = Broadcaster::getInstance($broadcasterID);
@@ -46,7 +45,7 @@ class BroadcasterController
 				
 				$broadcasterGroupModel = new \Models\BroadcasterGroupModel();
 				$form->broadcasterGroups = $broadcasterGroupModel->getAll();
-				
+			
 			break;
 		}
 		
@@ -54,22 +53,19 @@ class BroadcasterController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Display the broadcaster page
-	 * @param integer $broadcasterID       The ID of the broadcaster to display
+	 * @param integer $broadcasterID The ID of the broadcaster to display
 	 * @param string  [$tab                = "CAMPAIGNS"] Wich tab should we land on
 	 */
-	public function display($broadcasterID, $tab = "CAMPAIGNS")
+	public function display ($broadcasterID, $tab = "CAMPAIGNS")
 	{
 		\Library\User::onlyAdmins();
 		
 		//Retrieve informations on the braodcaster
 		$broadcaster = Broadcaster::getInstance($broadcasterID);
 		
-		if(!$broadcaster)
+		if (!$broadcaster)
 			return;
 		
 		//Get the view
@@ -90,10 +86,7 @@ class BroadcasterController
 	}
 	
 	
-	
-	
-	
-	private function defaultAdsView($broadcasterID)
+	private function defaultAdsView ($broadcasterID)
 	{
 		$defaultAdController = new DefaultadController();
 		return $defaultAdController->home($broadcasterID);
@@ -103,7 +96,7 @@ class BroadcasterController
 	 * @param  \Objects\Broadcaster $broadcaster
 	 * @return string  The rendered tab
 	 */
-	private function campaignsView($broadcaster)
+	private function campaignsView ($broadcaster)
 	{
 		$view = new View("broadcasters/campaigns");
 		$view->broadcasterID = $broadcaster->getID();
@@ -112,8 +105,7 @@ class BroadcasterController
 		$campaigns = $broadcaster->getCampaigns();
 		
 		//In case there is no campaign to show
-		if(count($campaigns) == 0)
-		{
+		if (count($campaigns) == 0) {
 			//Display "no campaigns"
 			$noCampaigns = new View("broadcasters/noCampaign");
 			$view->campaignList = $noCampaigns->render();
@@ -124,8 +116,7 @@ class BroadcasterController
 		$list = new Composer();
 		
 		//For each campaign
-		foreach($campaigns as $campaign)
-		{
+		foreach ($campaigns as $campaign) {
 			$campaignView = new View("broadcasters/campaignList");
 			
 			$support = $campaign->getSupport();
@@ -150,7 +141,7 @@ class BroadcasterController
 	 * @param  \Objects\Broadcaster $broadcaster
 	 * @return string  The rendered tab
 	 */
-	private function clientsView($broadcaster)
+	private function clientsView ($broadcaster)
 	{
 		$view = new \Library\View("broadcasters/clients");
 		$view->broadcasterID = $broadcaster->getID();
@@ -158,8 +149,7 @@ class BroadcasterController
 		$clients = $broadcaster->getClients();
 		
 		//In case there is no client to show
-		if(count($clients) == 0)
-		{
+		if (count($clients) == 0) {
 			$noClients = new View("broadcasters/noClient");
 			$view->clientList = $noClients->render();
 			return $view->render();
@@ -167,8 +157,7 @@ class BroadcasterController
 		
 		$list = new \Library\Composer();
 		
-		foreach($clients as $client)
-		{
+		foreach ($clients as $client) {
 			$clientView = new \Library\View("broadcasters/clientList");
 			
 			$clientView->clientID = $client->getID();
@@ -188,24 +177,22 @@ class BroadcasterController
 	/**
 	 *
 	 */
-	public function create()
+	public function create ()
 	{
 		$_record = Record::createRecord(Record::BROADCASTER_CREATED);
 		
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
 		
-		if(empty($_POST['name']) ||!isset($_POST['groupID']))
-		{
+		if (empty($_POST['name']) || !isset($_POST['groupID'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing Fields")
-					->save();
+				->setMessage("Missing Fields")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -217,11 +204,10 @@ class BroadcasterController
 		
 		$model = new \Models\BroadcasterModel();
 		
-		if($model->broadcasterExistName($broadcasterName))
-		{
+		if ($model->broadcasterExistName($broadcasterName)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Broadcaster already exist")
-					->save();
+				->setMessage("Broadcaster already exist")
+				->save();
 			
 			http_response_code(400);
 			echo "alreadyExist";
@@ -230,11 +216,11 @@ class BroadcasterController
 		
 		$broadcasterID = $model->create($broadcasterName, $groupID);
 		
-		mkdir("defaultAds/$broadcasterID/");
+		//mkdir("defaultAds/$broadcasterID/");
 		
 		$_record->setResult(Record::OK)
-				->setRef1($broadcasterID)
-				->save();
+			->setRef1($broadcasterID)
+			->save();
 		
 		$this->display($broadcasterID);
 	}
@@ -243,28 +229,26 @@ class BroadcasterController
 	/**
 	 * @param $broadcasterID
 	 */
-	public function edit($broadcasterID)
+	public function edit ($broadcasterID)
 	{
 		$broadcaster = Broadcaster::getInstance($broadcasterID);
 		
 		$_record = Record::createRecord(Record::BROADCASTER_UPDATED);
 		$_record->setRef1($broadcaster->getID());
 		
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
 		/*Did we received everything ?*/
-		if(empty($_POST['name']) ||!isset($_POST['groupID']))
-		{
+		if (empty($_POST['name']) || !isset($_POST['groupID'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing fields")
-					->save();
-				
+				->setMessage("Missing fields")
+				->save();
+			
 			http_response_code(400);
 			echo "missingField";
 			return;
@@ -276,12 +260,11 @@ class BroadcasterController
 		$broadcasterModel = new \Models\broadcasterModel();
 		
 		/*Can we use this name ?*/
-		if($broadcasterName != $broadcaster->getName() && $broadcasterModel->broadcasterExistName($broadcasterName))
-		{
+		if ($broadcasterName != $broadcaster->getName() && $broadcasterModel->broadcasterExistName($broadcasterName)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Broadcaster new name already exist")
-					->save();
-				
+				->setMessage("Broadcaster new name already exist")
+				->save();
+			
 			http_response_code(400);
 			echo "alreadyExist";
 			return;
@@ -289,11 +272,11 @@ class BroadcasterController
 		
 		/*Update name*/
 		$broadcaster->setName($broadcasterName)
-					->setGroupID($groupID)
-					->save();
+			->setGroupID($groupID)
+			->save();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$this->display($broadcaster->getID());
 	}
@@ -302,17 +285,16 @@ class BroadcasterController
 	/**
 	 * @param $broadcasterID
 	 */
-	public function delete($broadcasterID)
+	public function delete ($broadcasterID)
 	{
 		$broadcaster = \Objects\Broadcaster::getInstance($broadcasterID);
 		
 		$_record = Record::createRecord(Record::BROADCASTER_REMOVED);
 		$_record->setRef1($broadcaster->getID());
 		
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
@@ -325,14 +307,12 @@ class BroadcasterController
 		//TODO: Removed default ads
 		
 		//Remove users
-		foreach($clients as $client)
-		{
+		foreach ($clients as $client) {
 			$client->delete();
 		}
 		
 		//Remove campaigns
-		foreach($campaigns as $campaign)
-		{
+		foreach ($campaigns as $campaign) {
 			$campaign->delete();
 		}
 		
@@ -346,7 +326,7 @@ class BroadcasterController
 		$broadcasterModel->delete();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$home = new HomeController();
 		$home->clients();

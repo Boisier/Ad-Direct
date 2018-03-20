@@ -6,11 +6,10 @@ use Library\Params;
 
 class HomeController
 {
-	public function main()
+	public function main ()
 	{
 		//Visitor index if not logged in
-		if(!\Library\User::loggedIn())
-		{
+		if (!\Library\User::loggedIn()) {
 			$this->visitorIndex();
 			return;
 		}
@@ -18,8 +17,7 @@ class HomeController
 		$user = \Objects\User::getInstance(\Library\User::id());
 		
 		//Force user to review legals if needed
-		if(!$user->isAdmin() && !$user->hasApprovedLegal())
-		{
+		if (!$user->isAdmin() && !$user->hasApprovedLegal()) {
 			$page = $this->reviewLegal();
 			return;
 		}
@@ -36,7 +34,7 @@ class HomeController
 		
 		
 		/*MainPage*/
-		if(\Library\User::isAdmin())
+		if (\Library\User::isAdmin())
 			$body = $this->adminHome();
 		else
 			$body = $this->clientHome();
@@ -46,14 +44,14 @@ class HomeController
 		
 		/*Build & print*/
 		$page->attach($head)
-			 ->attach($header)
-			 ->attach($body)
-			 ->attach($footer);
+			->attach($header)
+			->attach($body)
+			->attach($footer);
 		
 		echo $page->render();
 	}
 	
-	private function visitorIndex()
+	private function visitorIndex ()
 	{
 		$page = new \Library\Composer();
 		
@@ -62,13 +60,13 @@ class HomeController
 		$footer = new \Library\View("visitor/footer");
 		
 		$page->attach($head)
-			 ->attach($body)
-			 ->attach($footer);
+			->attach($body)
+			->attach($footer);
 		
 		echo $page->render();
 	}
 	
-	private function reviewLegal()
+	private function reviewLegal ()
 	{
 		$page = new \Library\Composer();
 		
@@ -84,46 +82,44 @@ class HomeController
 		echo $page->render();
 	}
 	
-	private function adminHome()
+	private function adminHome ()
 	{
 		$view = new \Library\View("admin/home");
 		
 		$userModel = new \Models\UserModel(\Library\User::id());
 		$view->privileges = $userModel->privileges("justNames");
-			
+		
 		return $view;
 		
 	}
 	
-	private function clientHome()
+	private function clientHome ()
 	{
 		$user = \Objects\User::getInstance(\Library\User::id());
 		
 		$view = new \Library\View("client/home");
 		$view->campaigns = $user->getCampaigns(\Library\User::id());
-			
+		
 		return $view;
 		
 	}
 	
-	public function legals($legalPage)
+	public function legals ($legalPage)
 	{
 		$view = new \Library\View("client/legalText");
 		$view->legalName = \Library\Sanitize::string($legalPage);
 		
 		echo $view->render();
 	}
-
-
 	
 	
-	public function overview()
+	public function overview ()
 	{
 		\Library\User::onlyLoggedIn();
 		
-		if(\Library\User::isAdmin())
+		if (\Library\User::isAdmin())
 			$page = new \Library\View("admin/overview");
-			//$page = new \Library\View("common/badAction");
+		//$page = new \Library\View("common/badAction");
 		else
 			$page = $this->clientOverview();
 		
@@ -131,10 +127,7 @@ class HomeController
 	}
 	
 	
-	
-	
-	
-	public function clientOverview()
+	public function clientOverview ()
 	{
 		$page = new \Library\View("client/overview");
 		
@@ -142,10 +135,7 @@ class HomeController
 	}
 	
 	
-	
-	
-	
-	public function defaultads()
+	public function defaultads ()
 	{
 		$page = new \Library\View("client/defaultAdsOverview");
 		
@@ -160,9 +150,7 @@ class HomeController
 	}
 	
 	
-	
-	
-	public function clients()
+	public function clients ()
 	{
 		\Library\User::onlyAdmins();
 		
@@ -175,8 +163,7 @@ class HomeController
 		
 		$broadcasters = $broadcasterModel->getAll();
 		
-		if(count($broadcasters) == 0)
-		{
+		if (count($broadcasters) == 0) {
 			$view = new \Library\View("broadcasters/noBroadcaster");
 			$page->broadcastersList = $view->render();
 			
@@ -186,8 +173,7 @@ class HomeController
 		
 		$broadcasterList = new \Library\Composer();
 		
-		foreach($broadcasters as $broadcaster)
-		{
+		foreach ($broadcasters as $broadcaster) {
 			$view = new \Library\View("broadcasters/broadcasterList");
 			
 			$view->broadcasterID = $broadcaster->getID();
@@ -205,15 +191,13 @@ class HomeController
 	}
 	
 	
-	
-	
-	public function params()
+	public function params ()
 	{
 		\Library\User::onlyAdmins();
 		
 		$page = new \Library\View("params/home");
 		
-		$user= \Objects\User::getInstance(\Library\User::id());
+		$user = \Objects\User::getInstance(\Library\User::id());
 		$page->privileges = $user->getPrivileges("justNames");
 		
 		echo $page->render();

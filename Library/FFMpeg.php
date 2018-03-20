@@ -39,10 +39,7 @@ class FFMpeg
 	
 	public static function fracToFloat($frac)
 	{
-        $mathString = trim($frac);
-        $mathString = str_replace ('[^0-9\+-\*\/\(\) ]', '', $mathString);
-
-        $compute = create_function("", "return (" . $mathString . ");" );
-        return 0 + $compute();
+		$numbers = explode("/", $frac);
+		return round($numbers[0] / $numbers[1], 6);
 	}
 }

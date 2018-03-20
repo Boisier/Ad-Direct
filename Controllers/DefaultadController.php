@@ -12,23 +12,22 @@ class defaultadController
 	/**
 	 * Print the needed form to interact with the creative
 	 * @param string  $formName The name of the form
-	 * @param integer $adID     The Combo ID that 
+	 * @param integer $adID     The Combo ID that
 	 * @param integer $screenID identify the creative
 	 */
-	public function form($formName, $broadcasterID, $screenID)
+	public function form ($formName, $broadcasterID, $screenID)
 	{
 		$broadcasterID = \Library\Sanitize::int($broadcasterID);
 		$screenID = \Library\Sanitize::int($screenID);
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "delete":
 				
 				$form = new View("defaultAds/deleteDefaultAd");
 				
 				$form->broadcasterID = $broadcasterID;
 				$form->screenID = $screenID;
-				
+			
 			break;
 		}
 		
@@ -36,12 +35,8 @@ class defaultadController
 	}
 	
 	
-	
-	
-	
-	
-	public function home($broadcasterID)
-	{	
+	public function home ($broadcasterID)
+	{
 		$broadcasterID = Sanitize::int($broadcasterID);
 		
 		$view = new \Library\View("broadcasters/defaultAds");
@@ -51,8 +46,7 @@ class defaultadController
 		
 		$list = new Composer();
 		
-		foreach($supports as $support)
-		{
+		foreach ($supports as $support) {
 			$supportView = new View("supports/supportList");
 			$supportView->supportName = $support['name'];
 			$supportView->supportID = $support['ID'];
@@ -70,14 +64,10 @@ class defaultadController
 	}
 	
 	
-	
-	
-	
-	
-	public function display($broadcasterID, $supportID)
+	public function display ($broadcasterID, $supportID)
 	{
 		$broadcaster = \Objects\Broadcaster::getInstance($broadcasterID);
-	
+		
 		//Authorisation
 		\Library\User::canEditDefaultAds($broadcaster->getID());
 		
@@ -86,7 +76,7 @@ class defaultadController
 		$support = \Objects\Support::getInstance($supportID);
 		
 		//The header
-		if(\Library\User::isAdmin())
+		if (\Library\User::isAdmin())
 			$header = new View("defaultAds/headerAdmin");
 		else
 			$header = new View("defaultAds/headerClient");
@@ -99,17 +89,14 @@ class defaultadController
 		
 		//The block
 		$block = $this->buildBlock($broadcaster->getID(), $support->getID());
-
+		
 		$page->attach($block);
 		
 		echo $page->render();
 	}
 	
 	
-	
-	
-	
-	public function buildBlock($broadcasterID, $supportID)
+	public function buildBlock ($broadcasterID, $supportID)
 	{
 		$support = \Objects\Support::getInstance($supportID);
 		
@@ -127,8 +114,7 @@ class defaultadController
 		$multipleScreens = count($screens) > 1 ? true : false;
 		
 		//Create the view for each screen
-		foreach($screens as $screen)
-		{
+		foreach ($screens as $screen) {
 			//Get the screen creative (will return false if there is none)
 			$creativePath = $defaultAdModel->path($screen['ID'], true);
 			
@@ -136,8 +122,7 @@ class defaultadController
 			$view->hasCreative = false;
 			
 			//Attach infos to the screen block
-			if($creativePath != false)
-			{	
+			if ($creativePath != false) {
 				$view->hasCreative = true;
 				$view->creativePath = $creativePath;
 			}
@@ -162,15 +147,12 @@ class defaultadController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Create the modal to display the creative
-	 * @param integer $adID     Combo ID
-	 * @param integer $screenID 
+	 * @param integer $adID Combo ID
+	 * @param integer $screenID
 	 */
-	public function zoom($broadcasterID, $screenID)
+	public function zoom ($broadcasterID, $screenID)
 	{
 		$broadcasterID = Sanitize::int($broadcasterID);
 		$screenID = Sanitize::int($screenID);
@@ -189,31 +171,26 @@ class defaultadController
 	}
 	
 	
-	
-	
-	
-	public function add($broadcasterID, $screenID)
+	public function add ($broadcasterID, $screenID)
 	{
 		$broadcasterID = Sanitize::int($broadcasterID);
 		$screenID = Sanitize::int($screenID);
 		
 		$_record = Record::createRecord(Record::DEFAULT_AD_UPLOADED);
 		$_record->setRef1($broadcasterID)
-				->setRef2($screenID);
+			->setRef2($screenID);
 		
 		//Authorizations
-		if(!\Library\User::canEditDefaultAds($broadcasterID))
-		{
+		if (!\Library\User::canEditDefaultAds($broadcasterID)) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
 		//Do we have the file?
-		if(!array_key_exists("creative", $_FILES)) 
-		{
+		if (!array_key_exists("creative", $_FILES)) {
 			$_record->setResult(Record::FATAL_ERROR)
-					->setMessage("Missing POST var")
-					->save();
+				->setMessage("Missing POST var")
+				->save();
 			
 			//display errors
 			$errorModal = new View("modals/uploadErrors");
@@ -228,11 +205,10 @@ class defaultadController
 		$defaultAdModel = new \Models\DefaultadModel($broadcasterID);
 		
 		//Is there already an ad here ?
-		if($defaultAdModel->exist($screenID))
-		{
+		if ($defaultAdModel->exist($screenID)) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Default Ad already present")
-					->save();
+				->setMessage("Default Ad already present")
+				->save();
 			
 			return; //Cannot add if there's already something here
 		}
@@ -242,11 +218,10 @@ class defaultadController
 		$creativeController = new CreativeController();
 		$errors = $creativeController->controlCreative($_FILES['creative'], $specs);
 		
-		if(count($errors) != 0)
-		{
+		if (count($errors) != 0) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Creative does not match specs")
-					->save();
+				->setMessage("Creative does not match specs")
+				->save();
 			
 			//display errors
 			$errorModal = new View("modals/uploadErrors");
@@ -273,7 +248,7 @@ class defaultadController
 		$supportID = $screen->getSupportID();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		//And return what to show in place on the ad block
 		header('Content-Type: application/json');
@@ -281,21 +256,19 @@ class defaultadController
 	}
 	
 	
-	
-	public function delete($broadcasterID, $screenID)
+	public function delete ($broadcasterID, $screenID)
 	{
 		$broadcasterID = Sanitize::int($broadcasterID);
 		$screen = \Objects\Screen::getInstance($screenID);
 		
 		$_record = Record::createRecord(Record::DEFAULT_AD_REMOVED);
 		$_record->setRef1($broadcasterID)
-				->setRef2($screen->getID());
+			->setRef2($screen->getID());
 		
 		//Authorizations
-		if(!\Library\User::canEditDefaultAds($broadcasterID))
-		{
+		if (!\Library\User::canEditDefaultAds($broadcasterID)) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 		}
 		
 		$defaultAdModel = new \Models\DefaultadModel($broadcasterID);
@@ -304,7 +277,7 @@ class defaultadController
 		$supportID = $screen->getSupportID();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$this->display($broadcasterID, $supportID);
 	}

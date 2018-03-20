@@ -11,7 +11,7 @@ class SearchController
 	/**
 	 * Search through Broadcaster, campaigns and users
 	 */
-	public function search()
+	public function search ()
 	{
 		\Library\User::onlyAdmins();
 		
@@ -21,8 +21,7 @@ class SearchController
 		$results = $searchModel->search($query);
 		
 		//No results
-		if(count($results) == 0)
-		{
+		if (count($results) == 0) {
 			$view = new View("search/noResults");
 			
 			echo $view->render();
@@ -33,19 +32,17 @@ class SearchController
 		//Results, let's treat them one by one
 		$response = new Composer();
 		
-		foreach($results as $result)
-		{
-			switch($result['type'])
-			{
+		foreach ($results as $result) {
+			switch ($result['type']) {
 				case "broadcaster":
 					
 					$resultView = $this->broadcasterResult($result['ID']);
-					
+				
 				break;
 				case "campaign":
 					
 					$resultView = $this->campaignResult($result['ID']);
-					
+				
 				break;
 				case "client":
 					
@@ -64,7 +61,7 @@ class SearchController
 	 * @param int $broadcasterID
 	 * @return View
 	 */
-	private function broadcasterResult($broadcasterID)
+	private function broadcasterResult ($broadcasterID)
 	{
 		$broadcaster = \Objects\Broadcaster::getInstance($broadcasterID);
 		
@@ -82,7 +79,7 @@ class SearchController
 	 * @param int $campaignID
 	 * @return View
 	 */
-	private function campaignResult($campaignID)
+	private function campaignResult ($campaignID)
 	{
 		$campaign = \Objects\Campaign::getInstance($campaignID);
 		$support = $campaign->getSupport();
@@ -93,7 +90,7 @@ class SearchController
 		$view->startDate = $campaign->getStartDate();
 		$view->endDate = $campaign->getEndDate();
 		$view->supportName = $support->getName();
-
+		
 		return $view;
 	}
 	
@@ -101,7 +98,7 @@ class SearchController
 	 * @param int $userID
 	 * @return View
 	 */
-	private function clientResult($userID)
+	private function clientResult ($userID)
 	{
 		$user = \Objects\User::getInstance($userID);
 		
@@ -109,7 +106,7 @@ class SearchController
 		$view->clientName = $user->getName();
 		$view->clientEmail = $user->getEmail();
 		$view->broadcasterID = $user->getBroadcasterID();
-
+		
 		return $view;
 	}
 }

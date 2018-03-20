@@ -10,10 +10,9 @@ use Objects\Record,
 
 class CampaignController
 {
-	public function form($formName, $ID = 0, $ID2 = 0) 
-	{	
-		switch($formName)
-		{
+	public function form ($formName, $ID = 0, $ID2 = 0)
+	{
+		switch ($formName) {
 			case "add":
 				
 				\Library\User::restricted("MANAGE_CLIENTS");
@@ -28,7 +27,7 @@ class CampaignController
 				$form->broadcasterName = $broadcaster->getName();
 				$form->supports = $supportModel->supportList();
 				$form->defaultDurations = \Library\Params::get("DEFAULT_CAMPAIGN_DURATION");
-				
+			
 			break;
 			case "edit":
 				
@@ -50,7 +49,7 @@ class CampaignController
 				$form->displayDuration = $campaign->getDisplayDuration();
 				
 				$form->supports = $supportModel->supportList();
-				
+			
 			break;
 			case "editformats":
 				
@@ -67,7 +66,7 @@ class CampaignController
 				$form->screens = $campaign->getScreens();
 				
 				$form->mediaTypes = $mediaTypeModel->getAll();
-
+			
 			break;
 			case "delete":
 				
@@ -79,7 +78,7 @@ class CampaignController
 				
 				$form->campaignID = $campaign->getID();
 				$form->campaignName = $campaign->getName();
-				
+			
 			break;
 		}
 		
@@ -90,14 +89,14 @@ class CampaignController
 	/**
 	 * @param int $campaignID
 	 */
-	public function display($campaignID)
+	public function display ($campaignID)
 	{
 		//Authorizations
 		\Library\User::canEditCampaign($campaignID);
 		
 		$campaign = \Objects\Campaign::getInstance($campaignID);
 		
-		if(!$campaign)
+		if (!$campaign)
 			return;
 		
 		$broadcaster = $campaign->getBroadcaster();
@@ -106,7 +105,7 @@ class CampaignController
 		$page = new Composer();
 		
 		//Headers
-		if(\Library\User::isAdmin())
+		if (\Library\User::isAdmin())
 			$header = new View("campaigns/headerAdmin");
 		else
 			$header = new View("campaigns/headerClient");
@@ -131,11 +130,10 @@ class CampaignController
 		
 		//The ads
 		$ads = $campaign->getAds();
-
+		
 		$adController = new AdController();
 		
-		foreach($ads as $ad)
-		{
+		foreach ($ads as $ad) {
 			$page->attach($adController->buildBlock($ad->getID()));
 		}
 		
@@ -150,38 +148,34 @@ class CampaignController
 	}
 	
 	
-	
-	public function create()
+	public function create ()
 	{
 		$_record = Record::createRecord(Record::CAMPAIGN_CREATED);
 		
 		//Authorizations
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
 		//Exclude any possible errors
-		if(empty($_POST['broadcasterID']) ||empty($_POST['campaignSupport']))
-		{
+		if (empty($_POST['broadcasterID']) || empty($_POST['campaignSupport'])) {
 			$_record->setResult(Record::FATAL_ERROR)
-					->setMessage("Missing POST var")
-					->save();
+				->setMessage("Missing POST var")
+				->save();
 			
 			http_response_code(400);
 			echo "fatalError";
 			return;
 		}
 		
-		if(empty($_POST['campaignName']) || empty($_POST['campaignStartDate']) || empty($_POST['campaignEndDate']) || empty($_POST['adLimit']) || empty($_POST['displayDuration']))
-		{
+		if (empty($_POST['campaignName']) || empty($_POST['campaignStartDate']) || empty($_POST['campaignEndDate']) || empty($_POST['adLimit']) || empty($_POST['displayDuration'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing fields")
-					->save();
-				
+				->setMessage("Missing fields")
+				->save();
+			
 			http_response_code(400);
 			echo "missingField";
 			return;
@@ -199,8 +193,7 @@ class CampaignController
 		$campaignEndDate = \DateTime::createFromFormat($dateFormat, $_POST['campaignEndDate']);
 		
 		//Verify dates formats
-		if(!$campaignStartDate || !$campaignEndDate)
-		{
+		if (!$campaignStartDate || !$campaignEndDate) {
 			$_record->setResult(Record::REFUSED)
 				->setMessage("Incoherent dates")
 				->save();
@@ -217,11 +210,10 @@ class CampaignController
 		$adLimit = \Library\Sanitize::int($_POST['adLimit']);
 		$displayDuration = \Library\Sanitize::int($_POST['displayDuration']);
 		
-		if($campaignEndDate < $campaignStartDate)
-		{
+		if ($campaignEndDate < $campaignStartDate) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Incoherent dates")
-					->save();
+				->setMessage("Incoherent dates")
+				->save();
 			
 			http_response_code(400);
 			echo "badDates";
@@ -230,20 +222,20 @@ class CampaignController
 		
 		//Create the campaign
 		$campaign = Campaign::create($broadcasterID,
-									 $supportID,
-									 $campaignName,
-									 $campaignStartDate,
-									 $campaignEndDate,
-									 $adLimit,
-									 $displayDuration);
+			$supportID,
+			$campaignName,
+			$campaignStartDate,
+			$campaignEndDate,
+			$adLimit,
+			$displayDuration);
 		
 		//Create the campaign Directory
 		$campaignUID = $campaign->getCampaignUID();
 		mkdir("campaigns/$campaignUID", 0777);
 		
 		$_record->setResult(Record::OK)
-				->setRef1($campaign->getID())
-				->save();
+			->setRef1($campaign->getID())
+			->save();
 		
 		$emailController = new EmailController();
 		$emailController->create(EmailController::EMAIL_SCHEDULE_CAMPAIGN, $campaign->getID());
@@ -253,43 +245,39 @@ class CampaignController
 	}
 	
 	
-	
-	public function update()
+	public function update ()
 	{
 		$campaign = Campaign::getInstance($_POST['campaignID']);
 		
-		if(!$campaign)
+		if (!$campaign)
 			return; //Bad ID
 		
 		$_record = Record::createRecord(Record::CAMPAIGN_UPDATED);
 		$_record->setRef1($campaign->getID());
 		
 		//Authorizations
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
 		//Exclude any possible error
-		if(empty($_POST['campaignID']) || empty($_POST['campaignSupport']))
-		{
+		if (empty($_POST['campaignID']) || empty($_POST['campaignSupport'])) {
 			$_record->setResult(Record::FATAL_ERROR)
-					->setMessage("Missing POST var")
-					->save();
+				->setMessage("Missing POST var")
+				->save();
 			
 			http_response_code(400);
 			echo "fatalError";
 			return;
 		}
 		
-		if(empty($_POST['campaignName']) || empty($_POST['campaignStartDate']) || empty($_POST['campaignEndDate']) || empty($_POST['adLimit']) || empty($_POST['displayDuration']))
-		{
+		if (empty($_POST['campaignName']) || empty($_POST['campaignStartDate']) || empty($_POST['campaignEndDate']) || empty($_POST['adLimit']) || empty($_POST['displayDuration'])) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Missing Fields")
-					->save();
+				->setMessage("Missing Fields")
+				->save();
 			
 			http_response_code(400);
 			echo "missingField";
@@ -307,8 +295,7 @@ class CampaignController
 		$campaignEndDate = \DateTime::createFromFormat($dateFormat, $_POST['campaignEndDate']);
 		
 		//Verify dates format
-		if(!$campaignStartDate || !$campaignEndDate)
-		{
+		if (!$campaignStartDate || !$campaignEndDate) {
 			$_record->setResult(Record::REFUSED)
 				->setMessage("Incoherent dates")
 				->save();
@@ -326,11 +313,10 @@ class CampaignController
 		$displayDuration = \Library\Sanitize::int($_POST['displayDuration']);
 		
 		//Handle the dates
-		if($campaignEndDate < $campaignStartDate)
-		{
+		if ($campaignEndDate < $campaignStartDate) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Incoherent dates")
-					->save();
+				->setMessage("Incoherent dates")
+				->save();
 			
 			http_response_code(400);
 			echo "badDates";
@@ -338,13 +324,12 @@ class CampaignController
 		}
 		
 		//Confirm we can change the support
-		$currentSupportID =  $campaign->getSupportID();
+		$currentSupportID = $campaign->getSupportID();
 		
-		if($currentSupportID != $supportID && $campaign->getNbrAds() != 0)
-		{
+		if ($currentSupportID != $supportID && $campaign->getNbrAds() != 0) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Cannot update support if there is ads in the campaign")
-					->save();
+				->setMessage("Cannot update support if there is ads in the campaign")
+				->save();
 			
 			http_response_code(400);
 			echo "cannotChangeSupportIfAdsPresents";
@@ -354,15 +339,15 @@ class CampaignController
 		//Update the campaign
 		
 		$campaign->setSupportID($supportID)
-				 ->setCampaignName($campaignName)
-				 ->setStartDate($campaignStartDate)
-				 ->setEndDate($campaignEndDate)
-				 ->setAdLimit($adLimit)
-				 ->setDisplayDuration($displayDuration)
-				 ->save();
+			->setCampaignName($campaignName)
+			->setStartDate($campaignStartDate)
+			->setEndDate($campaignEndDate)
+			->setAdLimit($adLimit)
+			->setDisplayDuration($displayDuration)
+			->save();
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$emailController = new EmailController();
 		$emailController->create(EmailController::EMAIL_UPDATE_CAMPAIGN_SCHEDULE, $campaign->getID());
@@ -372,28 +357,25 @@ class CampaignController
 	}
 	
 	
-	
-	public function updateformats()
+	public function updateformats ()
 	{
 		$campaign = \Objects\Campaign::getInstance($_POST['campaignID']);
 		
-		if(!$campaign)
+		if (!$campaign)
 			return; //Bad ID
 		
 		$_record = Record::createRecord(Record::CAMPAIGN_FORMATS_UPDATED);
 		$_record->setRef1($campaign->getID());
 		
 		//Authorizations
-		if(!\Library\User::hasPrivilege("MANAGE_CLIENTS"))
-		{
+		if (!\Library\User::hasPrivilege("MANAGE_CLIENTS")) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->save();
+				->save();
 			
 			return;
 		}
 		
-		if(empty($_POST['campaignID']))
-		{
+		if (empty($_POST['campaignID'])) {
 			$_record->setResult(Record::FATAL_ERROR)
 				->setMessage("Missing POST var")
 				->save();
@@ -406,13 +388,11 @@ class CampaignController
 		$screens = $campaign->getScreens();
 		
 		//Do we have everything ?
-		foreach($screens as $screen)
-		{
-			$screenFormatID = "screenFormat".$screen->getID();
-			$screenSizeID = "screenSize".$screen->getID();
+		foreach ($screens as $screen) {
+			$screenFormatID = "screenFormat" . $screen->getID();
+			$screenSizeID = "screenSize" . $screen->getID();
 			
-			if(!isset($_POST[$screenFormatID]) ||empty($_POST[$screenSizeID]))
-			{
+			if (!isset($_POST[$screenFormatID]) || empty($_POST[$screenSizeID])) {
 				$_record->setResult(Record::FATAL_ERROR)
 					->setMessage("Missing screen info POST vars")
 					->save();
@@ -426,37 +406,32 @@ class CampaignController
 		//Can we update the mediaTypes, or only the sizeLimits ?
 		$ignoreMediaTypes = false;
 		
-		if($campaign->getNbrAds() != 0)
+		if ($campaign->getNbrAds() != 0)
 			$ignoreMediaTypes = true;
 		
 		$campaignModel = new \Models\CampaignModel($campaign->getID());
 		
-		foreach($screens as $screen)
-		{
-			$screenFormatID = "screenFormat".$screen->getID();
-			$screenSizeID = "screenSize".$screen->getID();
+		foreach ($screens as $screen) {
+			$screenFormatID = "screenFormat" . $screen->getID();
+			$screenSizeID = "screenSize" . $screen->getID();
 			
 			$screenFormat = \Library\Sanitize::int($_POST[$screenFormatID]);
 			$screenSizeLimit = \Library\Sanitize::int($_POST[$screenSizeID]);
 			
-			if($ignoreMediaTypes)
+			if ($ignoreMediaTypes)
 				$screenFormat = $screen->getMediaType();
 			
 			$campaignModel->updateScreen($screen->getID(), $screenFormat, $screenSizeLimit);
 		}
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		$this->display($campaign->getID());
 	}
 	
 	
-	
-	
-	
-	
-	public function delete($campaignID, $silent = false)
+	public function delete ($campaignID, $silent = false)
 	{
 		\Library\User::restricted("MANAGE_CLIENTS");
 		
@@ -464,11 +439,10 @@ class CampaignController
 		$campaign = \Objects\Campaign::getInstance($campaignID);
 		$campaign->delete();
 		
-		if($silent)
+		if ($silent)
 			return;
 		
 		$broadcasterController = new BroadcasterController();
 		$broadcasterController->display($campaign->getBroadcasterID(), "CAMPAIGNS");
 	}
 }
- 

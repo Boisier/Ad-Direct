@@ -13,38 +13,33 @@ class AuthController
 	/**
 	 * AuthController constructor.
 	 */
-	public function __construct()
+	public function __construct ()
 	{
 		$this->model = new \Models\AuthModel();
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Try to log in the user
 	 */
-	public function login()
+	public function login ()
 	{
 		$_record = Record::createRecord(Record::USER_LOGGED_IN);
 		
 		/**Not already logged in**/
-		if(\Library\User::loggedIn())
-		{
+		if (\Library\User::loggedIn()) {
 			$_record->setResult(Record::UNAUTHORIZED)
-					->setMessage("User already logged in")
-					->save();
+				->setMessage("User already logged in")
+				->save();
 			
 			header("location:/");
 			return;
 		}
-	
+		
 		/**All infos**/
-		if(empty($_POST["login"]) || empty($_POST["password"]))
-		{
+		if (empty($_POST["login"]) || empty($_POST["password"])) {
 			$_record->setResult(Record::REFUSED)
-					->save();
+				->save();
 			
 			Session::write("loginEvent", "missingField");
 			header("location:/");
@@ -59,10 +54,9 @@ class AuthController
 		$password = Sanitize::string($_POST["password"], true);
 		
 		//DOes this user exist ?
-		if(!$this->model->accountExist($login))
-		{
+		if (!$this->model->accountExist($login)) {
 			$_record->setResult(Record::REFUSED)
-					->save();
+				->save();
 			
 			Session::write("loginEvent", "unknownAccount");
 			header("location:/");
@@ -75,23 +69,21 @@ class AuthController
 		$_record->setUserID($user->getID());
 		
 		//Is the password OK ?
-		if(!password_verify($password, $user->getPassword()))
-		{
+		if (!password_verify($password, $user->getPassword())) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Bad password")
-					->save();
+				->setMessage("Bad password")
+				->save();
 			
 			Session::write("loginEvent", "loginFailed");
 			header("location:/");
-			return;	
+			return;
 		}
-		   
-		//Is this user live ? 
-		if(!$user->isLive())
-		{
+		
+		//Is this user live ?
+		if (!$user->isLive()) {
 			$_record->setResult(Record::REFUSED)
-					->setMessage("Client is deativated")
-					->save();
+				->setMessage("Client is deativated")
+				->save();
 			
 			Session::write("loginEvent", "inactiveAccount");
 			header("location:/");
@@ -103,19 +95,16 @@ class AuthController
 		Session::write("userAdmin", $user->isAdmin());
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		header("location:/");
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Log out the user
 	 */
-	public function logout()
+	public function logout ()
 	{
 		\Library\User::onlyLoggedIn();
 		
@@ -127,7 +116,7 @@ class AuthController
 		Session::remove("userAdmin");
 		
 		$_record->setResult(Record::OK)
-				->save();
+			->save();
 		
 		header("location:/");
 	}

@@ -12,24 +12,20 @@ class RecordController
 	const DEFAULT_PAGE_SIZE = 100;
 	
 	
-	
-	
-	
 	/**
 	 * Print the needed form to interact with the logs
-	 * @param string  $formName            The name of the form
+	 * @param string $formName The name of the form
 	 * @param integer [$broadcasterID      = 0] The broadcaster ID
 	 */
-	public function form($formName, $adID, $action = 0)
+	public function form ($formName, $adID, $action = 0)
 	{
 		\Library\User::restricted("APPROVE_CREATIVES");
 		
-		switch($formName)
-		{
+		switch ($formName) {
 			case "review":
-			
-				$form = View("");
 				
+				$form = View("");
+			
 			break;
 		}
 		
@@ -37,18 +33,15 @@ class RecordController
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Insert a new review, if possible, for the given ad
 	 * @param integer $adID The ad to ork with
 	 */
-	public function userlogs($userID)
+	public function userlogs ($userID)
 	{
 		$user = \Objects\User::getInstance($userID);
 		
-		if(!$user)
+		if (!$user)
 			return;
 		
 		//Broadcaster infos
@@ -56,12 +49,9 @@ class RecordController
 		
 		$page = new Composer();
 		
-		if($user->isAdmin())
-		{
+		if ($user->isAdmin()) {
 			$header = new View("records/headerAdmin");
-		}
-		else
-		{
+		} else {
 			$header = new View("records/headerClient");
 			$header->broadcasterID = $broadcaster->getID();
 			$header->broadcasterName = $broadcaster->getName();
@@ -81,19 +71,17 @@ class RecordController
 		$body->userID = $user->getID();
 		
 		$page->attach($header)
-			 ->attach($body);
+			->attach($body);
 		
 		echo $page->render();
 	}
 	
 	
-	
-	public function getPage($userID, $page)
+	public function getPage ($userID, $page)
 	{
 		$user = \Objects\User::getInstance($userID);
 		
-		if(!$user)
-		{
+		if (!$user) {
 			echo json_encode(["success" => false]);
 			return;
 		}
@@ -103,27 +91,25 @@ class RecordController
 		
 		header('Content-Type: application/json');
 		echo json_encode(["success" => true,
-						  "end" => $nbrLogs < self::DEFAULT_PAGE_SIZE,
-						  "html" => $logList->render()]);
+			"end" => $nbrLogs < self::DEFAULT_PAGE_SIZE,
+			"html" => $logList->render()]);
 	}
-	
 	
 	
 	/**
 	 * @param \Objects\User $user
-	 * @param int $page
-	 * @param int $length
+	 * @param int           $page
+	 * @param int           $length
 	 * @return Composer
 	 */
-	private function buildLogPage(\Objects\User $user, int $page, int $length = self::DEFAULT_PAGE_SIZE)
+	private function buildLogPage (\Objects\User $user, int $page, int $length = self::DEFAULT_PAGE_SIZE)
 	{
 		$logs = $user->getLogPage($page, $length);
 		$dateformat = \Library\Localization::dateFormat();
 		
 		$list = new Composer();
 		
-		foreach($logs as $log)
-		{
+		foreach ($logs as $log) {
 			$logView = new View("records/recordList");
 			$logView->date = $log->getDate();
 			$logView->dateformat = $dateformat;
@@ -137,9 +123,6 @@ class RecordController
 		
 		return $list;
 	}
-	
-	
-	
 	
 	
 }

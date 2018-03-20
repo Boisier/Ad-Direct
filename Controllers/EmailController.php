@@ -6,9 +6,8 @@ use \Library\View,
 	\Library\Composer;
 
 
-
 class EmailController
-{	
+{
 	const EMAIL_NEW_CLIENT = "WELCOME_EMAIL";
 	const EMAIL_CLIENT_UPDATE = "CLIENT_UPDATE";
 	const EMAIL_CLIENT_NEW_PASSWORD = "CLIENT_PASSWORD_UPDATE";
@@ -22,32 +21,27 @@ class EmailController
 	/**
 	 * @param string $type
 	 * @param int refID1
-	 * @param int $refID2
-	 * @param array $data
+	 * @param int    $refID2
+	 * @param array  $data
 	 */
-	public function create($type, $refID1, $refID2 = 0, $data = [])
+	public function create ($type, $refID1, $refID2 = 0, $data = [])
 	{
-		if(!\Library\User::loggedIn())
-		{
-			if(empty($data["AUTOMATED"]) || $data["AUTOMATED"] != true)
-			{
+		if (!\Library\User::loggedIn()) {
+			if (empty($data["AUTOMATED"]) || $data["AUTOMATED"] != true) {
 				$page = new \Library\View("common/badAction");
 				echo $page->render();
 				exit;
 			}
 			
 			//Set Emmiter to main admin account
-			$emitter = 1; 
-		}
-		else
-		{
+			$emitter = 1;
+		} else {
 			$emitter = \Library\User::id();
 		}
 		
 		$type = strtoupper($type);
 		
-		if(!$this->typeIsValid($type))
-		{
+		if (!$this->typeIsValid($type)) {
 			$page = new \Library\View("common/badAction");
 			echo $page->render();
 			exit;
@@ -57,23 +51,19 @@ class EmailController
 		
 		$emailModel = new \Models\EmailModel();
 		
-		foreach($recipients as $recipient)
-		{
+		foreach ($recipients as $recipient) {
 			//insert email in DB
 			$emailID = $emailModel->create($type, $emitter, $recipient, $refID1, $refID2);
-
+			
 			//Send the email
 			$this->send($emailID, $data);
 		}
 	}
 	
 	
-	
-	
-	private function typeIsValid($type)
+	private function typeIsValid ($type)
 	{
-		switch($type)
-		{
+		switch ($type) {
 			case EmailController::EMAIL_NEW_CLIENT:
 			case EmailController::EMAIL_CLIENT_UPDATE:
 			case EmailController::EMAIL_CLIENT_NEW_PASSWORD:
@@ -90,37 +80,34 @@ class EmailController
 	}
 	
 	
-	
-	
-	private function recipients($type, $refID1, $refID2)
-	{	
+	private function recipients ($type, $refID1, $refID2)
+	{
 		$emailModel = new \Models\EmailModel();
 		
-		switch($type)
-		{
+		switch ($type) {
 			case EmailController::EMAIL_NEW_CLIENT:
 			case EmailController::EMAIL_CLIENT_UPDATE:
 			case EmailController::EMAIL_CLIENT_NEW_PASSWORD:
 				
 				$recipients = $emailModel->clientEmail($refID1);
-				
+			
 			break;
 			case EmailController::EMAIL_REVIEW_AD:
 				
-				$recipients = $emailModel->reviewersEmails();		
-					
+				$recipients = $emailModel->reviewersEmails();
+			
 			break;
 			case EmailController::EMAIL_REVIEWED_AD:
 			case EmailController::EMAIL_END_OF_DISPLAY:
 				
 				$recipients = $emailModel->campaignEmailsByAd($refID1);
-					
+			
 			break;
 			case EmailController::EMAIL_SCHEDULE_CAMPAIGN:
 			case EmailController::EMAIL_UPDATE_CAMPAIGN_SCHEDULE:
 				
 				$recipients = $emailModel->broadcastHandlers();
-					
+			
 			break;
 			default;
 				$recipients = [];
@@ -130,9 +117,7 @@ class EmailController
 	}
 	
 	
-	
-	
-	private function generate($emailID, $data = [])
+	private function generate ($emailID, $data = [])
 	{
 		//Retrieve email informations
 		$emailModel = new \Models\EmailModel();
@@ -146,23 +131,22 @@ class EmailController
 		\Library\Localization::init($userLocal);
 		
 		
-		switch($emailInfos['type'])
-		{
-				
+		switch ($emailInfos['type']) {
+			
 			case EmailController::EMAIL_NEW_CLIENT:
 			case EmailController::EMAIL_CLIENT_UPDATE:
 			case EmailController::EMAIL_CLIENT_NEW_PASSWORD:
 				
-				if($emailInfos['type'] == EmailController::EMAIL_NEW_CLIENT)
+				if ($emailInfos['type'] == EmailController::EMAIL_NEW_CLIENT)
 					$content = new View("emails/welcome");
-				else if($emailInfos['type'] == EmailController::EMAIL_CLIENT_UPDATE)
+				else if ($emailInfos['type'] == EmailController::EMAIL_CLIENT_UPDATE)
 					$content = new View("emails/clientUpdate");
-				else if($emailInfos['type'] == EmailController::EMAIL_CLIENT_NEW_PASSWORD)
+				else if ($emailInfos['type'] == EmailController::EMAIL_CLIENT_NEW_PASSWORD)
 					$content = new View("emails/clientPasswordUpdate");
 				
 				$content->clientName = $user->getName();
 				$content->clientEmail = $user->getEmail();
-				
+			
 			break;
 			case EmailController::EMAIL_REVIEW_AD:
 				
@@ -177,38 +161,36 @@ class EmailController
 				$content->adStartDate = $ad->getStartTime();
 				$content->adEndDate = $ad->getEndTime();
 				$content->supportName = $ad->getSupport()->getName();
-				
+			
 			break;
 			case EmailController::EMAIL_REVIEWED_AD:
 			case EmailController::EMAIL_END_OF_DISPLAY:
 				
 				$ad = \Objects\Ad::getInstance($emailInfos['refID1']);
 				
-				if($emailInfos['type'] == EmailController::EMAIL_REVIEWED_AD)
-				{
+				if ($emailInfos['type'] == EmailController::EMAIL_REVIEWED_AD) {
 					$content = new View("emails/reviewedAd");
 					
 					$reviewModel = new \Models\ReviewModel();
 					$review = $reviewModel->get($emailInfos['refID1']);
 					$content->review = $review['status'];
 					$content->reviewMessage = $review['comment'];
-				}
-				else if($emailInfos['type'] == EmailController::EMAIL_END_OF_DISPLAY)
+				} else if ($emailInfos['type'] == EmailController::EMAIL_END_OF_DISPLAY)
 					$content = new View("emails/endOfDisplay");
 				
 				$content->campaignName = $ad->getCampaign()->getName();
 				$content->adStartDate = $ad->getStartTime();
 				$content->adEndDate = $ad->getEndTime();
-				
+			
 			break;
 			case EmailController::EMAIL_SCHEDULE_CAMPAIGN:
 			case EmailController::EMAIL_UPDATE_CAMPAIGN_SCHEDULE:
 				
 				$campaign = \Objects\Campaign::getInstance($emailInfos['refID1']);
-			
-				if($emailInfos['type'] == EmailController::EMAIL_SCHEDULE_CAMPAIGN)
+				
+				if ($emailInfos['type'] == EmailController::EMAIL_SCHEDULE_CAMPAIGN)
 					$content = new View("emails/newCampaignToSchedule");
-				else if($emailInfos['type'] == EmailController::EMAIL_UPDATE_CAMPAIGN_SCHEDULE)
+				else if ($emailInfos['type'] == EmailController::EMAIL_UPDATE_CAMPAIGN_SCHEDULE)
 					$content = new View("emails/campaignUpdate");
 				
 				$content->broadcasterName = $campaign->getBroadcaster()->getName();
@@ -217,7 +199,7 @@ class EmailController
 				$content->campaignEndDate = $campaign->getEndDate();
 				$content->supportName = $campaign->getSupport()->getName();
 				$content->displayFileURL = $campaign->getDisplayFileURL();
-				
+			
 			break;
 			default;
 				$content = new View("emails/badEmail");
@@ -239,11 +221,7 @@ class EmailController
 	}
 	
 	
-	
-	
-	
-	
-	public function send($emailID, $data = [])
+	public function send ($emailID, $data = [])
 	{
 		
 		//gather data
@@ -272,20 +250,20 @@ class EmailController
 		$PHPMailer->Port = $params["port"];
 		
 		//EMAIL CONFIG
-        $PHPMailer->isHTML(true);
+		$PHPMailer->isHTML(true);
 		$PHPMailer->setFrom('noreply@ad-direct.ca', 'Ad-Direct');
-        $PHPMailer->Subject = \mb_encode_mimeheader(\__($emailInfos['type']));
-        $PHPMailer->Body    = htmlspecialchars_decode(htmlentities($emailBody, ENT_NOQUOTES, "UTF-8"));
+		$PHPMailer->Subject = \mb_encode_mimeheader(\__($emailInfos['type']));
+		$PHPMailer->Body = htmlspecialchars_decode(htmlentities($emailBody, ENT_NOQUOTES, "UTF-8"));
 		$PHPMailer->addAddress($recipient);
 		
 		//TODO: Remove when online
 		//echo $emailBody;
 		
 		//Send the emails
-        $PHPMailer->send();	
+		$PHPMailer->send();
 	}
 	
-	public function display($emailUID)
+	public function display ($emailUID)
 	{
 		$emailModel = new \Models\EmailModel();
 		
