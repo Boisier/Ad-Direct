@@ -107,7 +107,7 @@ class AdController
 		//Ad directory
 		$adUID = $ad->getUID();
 		$campaignUID = $campaign->getCampaignUID();
-		mkdir("campaigns/$campaignUID/$adUID/");
+		mkdir("campaigns/$campaignUID/$adUID/", 0777, true);
 		
 		//Screen.s directory.ies
 		$screens = $campaign->getScreens();

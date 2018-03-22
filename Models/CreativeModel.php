@@ -220,8 +220,12 @@ class CreativeModel
 		
 		$this->setCreative($this->ddb->lastInsertId());
 		
-		//Put the file in place
 		$path = $this->path(false);
+		
+		//Check for folders
+		mkdir(dirname($path), 0777, true);
+		
+		//Put the file in place
 		move_uploaded_file($file, $path);
 		
 		chmod($path, 0777);

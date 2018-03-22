@@ -11,7 +11,7 @@ class UserController
 {
 	public function form ($formName, $ID = 0)
 	{
-		switch ($formName) {
+		switch (strtolower($formName)) {
 			case "createclient":
 				
 				\Library\User::restricted("MANAGE_CLIENTS");
@@ -28,7 +28,11 @@ class UserController
 				
 				$client = User::getInstance($ID);
 				
-				$form = new View("users/$formName");
+				if($formName == "editclient")
+					$form = new View("users/editClient");
+				else
+					$form = new View("users/deleteClient");
+				
 				$form->clientID = $client->getID();
 				$form->clientName = $client->getName();
 				$form->clientEmail = $client->getEmail();
@@ -54,7 +58,11 @@ class UserController
 				
 				$admin = User::getInstance($ID);
 				
-				$form = new View("admin/$formName");
+				if($formName == "editclient")
+					$form = new View("users/editadmin");
+				else
+					$form = new View("users/deleteadmin");
+			
 				$form->adminID = $admin->getID();
 				$form->adminName = $admin->getName();
 				$form->adminEmail = $admin->getEmail();
