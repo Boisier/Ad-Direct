@@ -14,18 +14,18 @@ function DynamicLinkManager() {
    * @param {boolean} isFormData = false is the data a formData or not
    */
   this.go = function (link, data = null, isFormData = false) {
-    $("#mainContainer").css("display", "none");
+    $("#mainContainer").hide();
     $("#loadContainer").css("display", "flex");
 
     this.execute(link, data, isFormData).done(function (data) {
       $("#mainContainer").html(data);
-      $("#loadContainer").css("display", "none");
-      $("#mainContainer").css("display", "block");
+      $("#loadContainer").hide();
+      $("#mainContainer").show();
     }).fail()
     {
       //$("#mainContainer").html("error");
-      $("#loadContainer").css("display", "none");
-      $("#mainContainer").css("display", "block");
+      $("#loadContainer").hide();
+      $("#mainContainer").show();
     }
     ;
   };

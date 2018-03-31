@@ -159,18 +159,18 @@ function DynamicLinkManager() {
     var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var isFormData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
-    $("#mainContainer").css("display", "none");
+    $("#mainContainer").hide();
     $("#loadContainer").css("display", "flex");
 
     this.execute(link, data, isFormData).done(function (data) {
       $("#mainContainer").html(data);
-      $("#loadContainer").css("display", "none");
-      $("#mainContainer").css("display", "block");
+      $("#loadContainer").hide();
+      $("#mainContainer").show();
     }).fail();
     {
       //$("#mainContainer").html("error");
-      $("#loadContainer").css("display", "none");
-      $("#mainContainer").css("display", "block");
+      $("#loadContainer").hide();
+      $("#mainContainer").show();
     }
     ;
   };

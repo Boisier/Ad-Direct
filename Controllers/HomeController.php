@@ -183,6 +183,8 @@ class HomeController
 			$view->groupID = $broadcaster->getGroupID();
 			$view->pending = $broadcaster->getPendingNbrAds();
 			
+			
+			
 			$broadcasterList->attach($view);
 		}
 		
