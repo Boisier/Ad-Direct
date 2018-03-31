@@ -7,33 +7,38 @@ use Models\BroadcasterModel;
 class Broadcaster
 {
 	private $broadcasterModel;
-	
+
 	/**
 	 * @var int|null
 	 */
 	private $broadcasterID = null;
-	
+
 	/**
 	 * @var string
 	 */
 	private $broadcasterName;
-	
+
 	/**
 	 * @var int
 	 */
 	private $createTime;
-	
+
 	/**
 	 * @var int
 	 */
 	private $creatorID;
-	
+
 	/**
 	 * @var int
 	 */
 	private $groupID;
-	
-	
+
+
+	const BROADCASTER_STATUS_NOT_PLAYING = 0;
+	const BROADCASTER_STATUS_PENDING = 1;
+	const BROADCASTER_STATUS_PLAYING = 2;
+
+
 	/**
 	 * Create a new broadcaster
 	 * @param $broadcasterName
@@ -44,14 +49,14 @@ class Broadcaster
 								  $broadcasterGroupID)
 	{
 		$broadcasterModel = new BroadcasterModel();
-		
+
 		$broadcasterID = $broadcasterModel->create($broadcasterName,
 								                   $broadcasterGroupID);
-		
+
 		return self::getInstance($broadcasterID);
 	}
-	
-	
+
+
 	/**
 	 * Try to instantiate a Broadcaster object
 	 * @param $broadcasterID
@@ -61,22 +66,22 @@ class Broadcaster
 	{
 		//Sanitize the broadcaster ID
 		$broadcasterID = \Library\Sanitize::int($broadcasterID);
-		
+
 		//Do not instantiate if equal zero
 		if($broadcasterID == 0)
 			return false;
-		
+
 		$broadcasterModel = new BroadcasterModel();
-		
+
 		//Verify if broadcaster exist
 		if(!$broadcasterModel->broadcasterExist($broadcasterID))
 			return false;
-		
+
 		//Instantiate the broadcaster
 		return new self($broadcasterID);
 	}
-	
-	
+
+
 	/**
 	 * Broadcaster constructor.
 	 * @param $broadcasterID
@@ -85,15 +90,15 @@ class Broadcaster
 	{
 		$this->broadcasterID = $broadcasterID;
 		$this->broadcasterModel = new BroadcasterModel($broadcasterID);
-		
+
 		$broadcasterInfos = $this->broadcasterModel->getInfos();
-		
+
 		$this->broadcasterName = $broadcasterInfos['name'];
 		$this->createTime = $broadcasterInfos['createTime'];
 		$this->creatorID = $broadcasterInfos['creatorID'];
 		$this->groupID = $broadcasterInfos['groupID'];
 	}
-	
+
 	/**
 	 * @return int|null
 	 */
@@ -101,7 +106,7 @@ class Broadcaster
 	{
 		return $this->broadcasterID;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -109,7 +114,7 @@ class Broadcaster
 	{
 		return $this->broadcasterName;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -117,7 +122,7 @@ class Broadcaster
 	{
 		return $this->createTime;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -125,7 +130,7 @@ class Broadcaster
 	{
 		return $this->creatorID;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -134,8 +139,8 @@ class Broadcaster
 		$groupID = $this->groupID;
 		return $groupID == null ? 0 : $groupID;
 	}
-	
-	
+
+
 	/**
 	 * Get all campaigns of the broadcaster
 	 * @return Campaign[]
@@ -143,17 +148,17 @@ class Broadcaster
 	public function getCampaigns()
 	{
 		$campaignsID = $this->broadcasterModel->getCampaigns();
-		
+
 		$campaigns = [];
-		
+
 		foreach ($campaignsID as $campaignID)
 		{
 			array_push($campaigns, Campaign::getInstance($campaignID));
 		}
-		
+
 		return $campaigns;
 	}
-	
+
 	/**
 	 * Get nbr of campaigns in the broadcaster
 	 * @return int
@@ -162,7 +167,7 @@ class Broadcaster
 	{
 		return count($this->broadcasterModel->getCampaigns());
 	}
-	
+
 	/**
 	 * Get all clients of the broadcaster
 	 * @return User[]
@@ -170,17 +175,17 @@ class Broadcaster
 	public function getClients()
 	{
 		$clientsID = $this->broadcasterModel->getClients();
-		
+
 		$clients = [];
-		
+
 		foreach ($clientsID as $clientID)
 		{
 			array_push($clients, User::getInstance($clientID));
 		}
-		
+
 		return $clients;
 	}
-	
+
 	/**
 	 * Get nbr of clients in the broadcaster
 	 * @return int
@@ -189,10 +194,10 @@ class Broadcaster
 	{
 		return count($this->broadcasterModel->getClients());
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Return the number of ad pending in the broadcaster's campaigns
 	 * @return int The number of ads
@@ -201,11 +206,41 @@ class Broadcaster
 	{
 		return $this->broadcasterModel->getPendingNbrAds();
 	}
-	
-	
-	
-	
-	
+
+
+	/**
+	 * @return int Status of the Broadcaster
+	 */
+	public function getStatus()
+	{
+		$status = Broadcaster::BROADCASTER_STATUS_PLAYING;
+
+		$campaigns = $this->getCampaigns();
+
+		foreach($campaigns as $campaign)
+		{
+			$campaignStatus = $campaign->getStatus();
+
+			if($campaignStatus == Campaign::CAMPAIGN_STATUS_PENDING)
+			{
+				$status = Broadcaster::BROADCASTER_STATUS_PENDING;
+				break;
+			}
+
+			if($campaignStatus != Campaign::CAMPAIGN_STATUS_PLAYING)
+			{
+				$status = Broadcaster::BROADCASTER_STATUS_NOT_PLAYING;
+				continue;
+			}
+		}
+
+		return $status;
+	}
+
+
+
+
+
 	/**
 	 * @param string $broadcasterName
 	 * @return Broadcaster
@@ -215,7 +250,7 @@ class Broadcaster
 		$this->broadcasterName = $broadcasterName;
 		return $this;
 	}
-	
+
 	/**
 	 * @param int $groupID
 	 * @return Broadcaster
@@ -225,7 +260,7 @@ class Broadcaster
 		$this->groupID = $groupID;
 		return $this;
 	}
-	
+
 	/**
 	 * Save the broadcaster
 	 */
@@ -234,7 +269,7 @@ class Broadcaster
 		$this->broadcasterModel->update($this->broadcasterName,
 										$this->groupID);
 	}
-	
+
 	/**
 	 * Remove the broadcaster
 	 */
@@ -242,5 +277,5 @@ class Broadcaster
 	{
 		$this->broadcasterModel->delete();
 	}
-	
+
 }

@@ -2,58 +2,65 @@
 
 namespace Objects;
 
+use Controllers\ReviewController;
 use \Models\AdModel;
 
 class Ad
 {
 	private $adModel;
-	
-	/**
-	 * @var int|null
-	 */
+
+	/** @var int|null */
 	private $adID = NULL;
-	
+
 	/**
 	 * @var int
 	 */
 	private $campaignID;
-	
+
 	/**
 	 * @var int
 	 */
 	private $supportID;
-	
+
 	/**
 	 * @var int
 	 */
 	private $userID;
-	
+
 	/**
 	 * @var string
 	 */
 	private $adName;
-	
+
 	/**
 	 * @var int
 	 */
 	private $startTime;
-	
+
 	/**
 	 * @var int
 	 */
 	private $endTime;
-	
+
 	/**
 	 * @var int
 	 */
 	private $order;
-	
+
 	/**
 	 * @var string
 	 */
 	private $adUID;
-	
-	
+
+	const AD_STATUS_EMPTY = 0;
+	const AD_STATUS_NOT_PLAYING = 1;
+	const AD_STATUS_PLAYING = 2;
+	const AD_STATUS_ENDED = 3;
+	const AD_STATUS_PENDING = 4;
+	const AD_STATUS_REJECTED = 5;
+
+
+
 	/**
 	 * @param int $campaignID
 	 * @param int $supportID
@@ -71,11 +78,11 @@ class Ad
 								 $supportID,
 								 $startTime,
 								 $endTime);
-		
+
 		return self::getInstance($adID);
 	}
-	
-	
+
+
 	/**
 	 * Try to instantiate an Ad Object
 	 * @param  integer $adID Id of the ad
@@ -85,22 +92,22 @@ class Ad
 	{
 		//Sanitize the ad ID
 		$adID = \Library\Sanitize::int($adID);
-		
+
 		//Do not instantiate if equal zero
 		if($adID == 0)
 			return false;
-		
+
 		$adModel = new AdModel();
-		
+
 		//Verify if ad exist
 		if(!$adModel->adExist($adID))
 			return false;
-		
+
 		//Instantiate the ad
 		return new Self($adID);
 	}
-	
-	
+
+
 	/**
 	 * Ad constructor.
 	 * @param $adID
@@ -109,9 +116,9 @@ class Ad
 	{
 		$this->adID = $adID;
 		$this->adModel = new AdModel($adID);
-		
+
 		$adInfos = $this->adModel->getInfos();
-		
+
 		$this->campaignID = $adInfos['campaignID'];
 		$this->supportID = $adInfos['supportID'];
 		$this->userID = $adInfos['userID'];
@@ -121,8 +128,8 @@ class Ad
 		$this->order = $adInfos['adOrder'];
 		$this->adUID = $adInfos['UID'];
 	}
-	
-	
+
+
 	/**
 	 * @return int|null
 	 */
@@ -130,7 +137,7 @@ class Ad
 	{
 		return $this->adID;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -138,7 +145,7 @@ class Ad
 	{
 		return $this->campaignID;
 	}
-	
+
 	/**
 	 * Return the Campaign Object
 	 * @return Campaign
@@ -147,7 +154,7 @@ class Ad
 	{
 		return Campaign::getInstance($this->campaignID);
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -155,7 +162,7 @@ class Ad
 	{
 		return $this->supportID;
 	}
-	
+
 	/**
 	 * @return Support
 	 */
@@ -163,7 +170,7 @@ class Ad
 	{
 		return Support::getInstance($this->supportID);
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -171,7 +178,7 @@ class Ad
 	{
 		return $this->userID;
 	}
-	
+
 	/**
 	 * @return User
 	 */
@@ -179,7 +186,7 @@ class Ad
 	{
 		return User::getInstance($this->userID);
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -187,7 +194,7 @@ class Ad
 	{
 		return $this->adName;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -195,7 +202,7 @@ class Ad
 	{
 		return $this->startTime;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -203,7 +210,7 @@ class Ad
 	{
 		return $this->endTime;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -211,7 +218,7 @@ class Ad
 	{
 		return $this->order;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -219,7 +226,7 @@ class Ad
 	{
 		return $this->adUID;
 	}
-	
+
 	/**
 	 * @param bool $rooted
 	 * @return string
@@ -228,15 +235,15 @@ class Ad
 	{
 		$campaignUID = $this->getCampaign()->getCampaignUID();
 		$adUID = $this->getUID();
-		
+
 		$path = "campaigns/$campaignUID/$adUID/";
-		
+
 		if($rooted)
 			$path = "/$path";
-		
+
 		return $path;
 	}
-	
+
 	/**
 	 * Return an array with the specs of the screen
 	 * @param  integer $screenID the id of the screen
@@ -246,14 +253,14 @@ class Ad
 	{
 		//First, verify this screen is part of this ad
 		$screens = $this->getScreens();
-		
+
 		if(!array_key_exists($screenID, $screens))
 			return false;
-		
+
 		//Get the screen specs
 		return $screens[$screenID]->getSpecsForCampaign();
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -261,7 +268,7 @@ class Ad
 	{
 		return count($this->adModel->getScreens());
 	}
-	
+
 	/**
 	 * Return a Screen Object for each screen of the ad
 	 * @return Screen[] an array of screen objects
@@ -271,19 +278,19 @@ class Ad
 		//Get all the screens of the ad
 		$screensID = $this->adModel->getScreens();
 		$campaign = $this->getCampaign();
-		
+
 		$screens = [];
-		
+
 		//Build an array of Screen objects
 		foreach($screensID as $screenID)
 		{
 			$screens[$screenID] = Screen::getInstance($screenID);
 			$screens[$screenID]->setCampaign($campaign);
 		}
-		
+
 		return $screens;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -291,7 +298,7 @@ class Ad
 	{
 		return count($this->adModel->getCreatives());
 	}
-	
+
 	/**
 	 * Return an array of Creative objects, one for each creative of the ad
 	 * @return Creative[]
@@ -300,18 +307,18 @@ class Ad
 	{
 		//Get all the screens of the ad
 		$creativesID = $this->adModel->getCreatives();
-		
+
 		$creatives = [];
-		
+
 		//Build an array of Screen objects
 		foreach($creativesID as $creativeID)
 		{
 			$creatives[$creativeID] = Creative::getInstance($creativeID);
 		}
-		
+
 		return $creatives;
 	}
-	
+
 	/**
 	 * @return bool|AdStats
 	 */
@@ -319,38 +326,76 @@ class Ad
 	{
 		return AdStats::getInstance($this->adID);
 	}
-	
-	
-	
-	
-	
-	
+
+	/**
+	 * @return int The status of the ad
+	 */
+	public function getStatus()
+	{
+		// Check if going to play
+		if(time() < $this->getStartTime())
+			return Ad::AD_STATUS_NOT_PLAYING;
+
+		// Check if playing ended
+		if(time() > $this->getEndTime())
+			return Ad::AD_STATUS_ENDED;
+
+		// Check if complete
+		if($this->getNbrCreatives() != $this->getNbrScreens())
+			return AD::AD_STATUS_EMPTY;
+
+		// Check if reviewed
+		if(!$this->isApproved())
+		{
+			if($this->adModel->getReviewStatus() == ReviewController::AD_PENDING)
+				return Ad::AD_STATUS_PENDING;
+
+			return Ad::AD_STATUS_REJECTED;
+		}
+
+		// The ad is playing
+		return Ad::AD_STATUS_PLAYING;
+	}
+
+
+	/**
+	 *
+	 */
+	public function isApproved()
+	{
+		//Two things to check, the current review of the ad and its creatives' status.
+		$review = $this->adModel->getReviewStatus();
+
+		//Cannot be displayed if status is not approved
+		if($review != ReviewController::AD_APPROVED &&
+			$review != ReviewController::AD_AUTO_APPROVED)
+			return false;
+
+		return true;
+	}
+
+
 	/**
 	 * Tell if the ad can be displayed.
 	 * @return bool
 	 */
 	public function canBeDisplayed()
 	{
-		//Two things to check, the current review of the ad and its creatives' status.
-		$review = $this->adModel->getReviewStatus();
-		
-		//Cannot be displayed if status is not approved
-		if($review != \Controllers\ReviewController::AD_APPROVED && 
-		   $review != \Controllers\ReviewController::AD_AUTO_APPROVED)
+		if(!$this->isApproved())
 			return false;
-		
+
 		$creatives = $this->getCreatives();
-		
+
 		foreach($creatives as $creative)
 		{
 			if($creative->getStatus() != \Controllers\CreativeController::CREATIVE_OK)
 				return false; //No need to go further
 		}
-		
+
 		return true;
 	}
-	
-	
+
+
 	/**
 	 * @param int $startTime
 	 * @return Ad
@@ -360,7 +405,7 @@ class Ad
 		$this->startTime = $startTime;
 		return $this;
 	}
-	
+
 	/**
 	 * @param int $endTime
 	 * @return Ad
@@ -370,18 +415,18 @@ class Ad
 		$this->endTime = $endTime;
 		return $this;
 	}
-	
-	
-	
-	
+
+
+
+
 	public function save()
 	{
 		$this->adModel->update($this->startTime, $this->endTime);
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Remove the Ad
 	 * Do not use save after
@@ -390,34 +435,34 @@ class Ad
 	{
 		$_record = Record::createRecord(Record::AD_REMOVED);
 		$_record->setRef1($this->getID());
-		
+
 		//Retrieve informations on the ads and its creatives
 		$screens = $this->getScreens();
 		$adPath = $this->getPath(false);
-		
+
 		//Delete every creatives the ad may contain
 		foreach($screens as $screen)
 		{
 			//Delete creatives if exists
 			$creative = Creative::getInstance($this->getID(), $screen->getID());
-			
+
 			if($creative != false)
 				$creative->delete();
-			
+
 			//Delete the screen folder
 			rmdir($adPath.$screen->getID()."/");
 		}
-		
+
 		$reviewModel = new \Models\ReviewModel();
 		$reviewModel->remove($this->getID());
-		
+
 		//Delete the ad
 		//Remove files
 		rmdir($this->getPath(false));
-		
+
 		//Delete the entry
 		$this->adModel->delete();
-		
+
 		$_record->setResult(Record::OK)
 				->save();
 	}

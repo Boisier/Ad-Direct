@@ -7,7 +7,7 @@ use \Models\CampaignModel;
 class Campaign
 {
 	private $campaignModel = NULL;
-	
+
 	private $campaignID = NULL;
 	private $campaignUID;
 	private $broadcasterID;
@@ -19,8 +19,14 @@ class Campaign
 	private $endDate;
 	private $displayDuration;
 	private $adLimit;
-	
-	
+
+	const CAMPAIGN_STATUS_EMPTY = 0;
+	const CAMPAIGN_STATUS_NOT_PLAYING = 1;
+	const CAMPAIGN_STATUS_PENDING = 2;
+	const CAMPAIGN_STATUS_PLAYING = 3;
+	const CAMPAIGN_STATUS_ENDED = 4;
+
+
 	/**
 	 * @param int $broadcasterID
 	 * @param int $supportID
@@ -48,12 +54,12 @@ class Campaign
 											 $campaignEndDate,
 											 $adLimit,
 											 $displayDuration);
-		
+
 		return self::getInstance($campaignID);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Try to instantiate a Campaign Object
 	 * @param  integer $campaignID Id of the campaign
@@ -63,23 +69,23 @@ class Campaign
 	{
 		//Sanitize the campaign ID
 		$campaignID = \Library\Sanitize::int($campaignID);
-		
+
 		//Do not instantiate if equal zero
 		if($campaignID == 0)
 			return false;
-		
+
 		$campaignModel = new CampaignModel();
-		
+
 		//Verify if campaign exist
 		if(!$campaignModel->campaignExist($campaignID))
 			return false;
-		
+
 		//Instantiate the campaign
 		return new Campaign($campaignID);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Set the campaign ID
 	 * @private
@@ -89,11 +95,11 @@ class Campaign
 	{
 		$this->campaignID = $campaignID;
 		$this->campaignModel = new CampaignModel($campaignID);
-		
-		
+
+
 		//Fill in the object
 		$campaignInfos = $this->campaignModel->getInfos();
-		
+
 		$this->campaignUID = $campaignInfos["UID"];
 		$this->broadcasterID = $campaignInfos["broadcasterID"];
 		$this->supportID = $campaignInfos["supportID"];
@@ -105,10 +111,10 @@ class Campaign
 		$this->displayDuration = $campaignInfos["displayDuration"];
 		$this->adLimit = $campaignInfos["adLimit"];
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * @return int
 	 */
@@ -116,7 +122,7 @@ class Campaign
 	{
 		return $this->campaignID;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -124,7 +130,7 @@ class Campaign
 	{
 		return $this->campaignUID;
 	}
-	
+
 	/**
 	 * @return Broadcaster
 	 */
@@ -132,7 +138,7 @@ class Campaign
 	{
 		return Broadcaster::getInstance($this->broadcasterID);
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -140,7 +146,7 @@ class Campaign
 	{
 		return $this->broadcasterID;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -148,7 +154,7 @@ class Campaign
 	{
 		return $this->creatorID;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -156,7 +162,7 @@ class Campaign
 	{
 		return $this->createDate;
 	}
-	
+
 	/**
 	 * @return string
 	 */
@@ -164,7 +170,7 @@ class Campaign
 	{
 		return $this->campaignName;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -172,7 +178,7 @@ class Campaign
 	{
 		return $this->startDate;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -180,7 +186,7 @@ class Campaign
 	{
 		return $this->endDate;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -188,7 +194,7 @@ class Campaign
 	{
 		return $this->displayDuration;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -196,7 +202,7 @@ class Campaign
 	{
 		return $this->adLimit;
 	}
-	
+
 	/**
 	 * @return int
 	 */
@@ -204,7 +210,7 @@ class Campaign
 	{
 		return $this->supportID;
 	}
-	
+
 	/**
 	 * @return Support
 	 */
@@ -212,13 +218,13 @@ class Campaign
 	{
 		return \Objects\Support::getInstance($this->supportID);
 	}
-	
+
 	public function getDisplayFileURL()
 	{
 		return "https://{$_SERVER['SERVER_NAME']}/display/generate/{$this->campaignID}/";
 	}
-	
-	
+
+
 	/**
 	 *
 	 */
@@ -226,11 +232,11 @@ class Campaign
 	{
 		return $this->campaignModel->isDebugging();
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	/**
 	 * Return a Screen Object for each screen of the campaign
 	 * @return Screen[] an array of screen objects
@@ -239,22 +245,22 @@ class Campaign
 	{
 		//Get all the screens of the ad
 		$screensID = $this->campaignModel->getScreens();
-		
+
 		$screens = [];
-		
+
 		//Build an array of Screen objects
 		foreach($screensID as $screenID)
 		{
 			$screens[$screenID] = Screen::getInstance($screenID);
 			$screens[$screenID]->setCampaign($this);
 		}
-		
+
 		return $screens;
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Return the number of ad in the campaign
 	 * @return int The number of ads
@@ -263,7 +269,7 @@ class Campaign
 	{
 		//Get all the ads of the campaign
 		$adsID = $this->campaignModel->getAds();
-		
+
 		return count($adsID);
 	}
 
@@ -278,10 +284,10 @@ class Campaign
 	{
 		return $this->campaignModel->getPendingNbrAds();
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Return a Ad Object for each ad of the campaign
 	 * @return Ad[] an array of Ad objects
@@ -290,24 +296,63 @@ class Campaign
 	{
 		//Get all the ads of the campaign
 		$adsID = $this->campaignModel->getAds();
-		
+
 		$ads = [];
-		
+
 		//Build an array of Ad objects
 		foreach($adsID as $adID)
 		{
 			$ads[$adID] = Ad::getInstance($adID);
 		}
-		
+
 		return $ads;
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+	public function getStatus()
+	{
+		// Check if going to play
+		if(time() < $this->getStartDate())
+			return Campaign::CAMPAIGN_STATUS_NOT_PLAYING;
+
+		// Check if playing ended
+		if(time() > $this->getEndDate())
+			return Campaign::CAMPAIGN_STATUS_ENDED;
+
+		// Check if empty
+		if($this->getNbrAds() == 0)
+			return Campaign::CAMPAIGN_STATUS_EMPTY;
+
+		// Check ads status
+		$ads = $this->getAds();
+		$status = Campaign::CAMPAIGN_STATUS_NOT_PLAYING;
+
+		foreach($ads as $ad)
+		{
+			$adStatus = $ad->getStatus();
+
+			if($adStatus == Ad::AD_STATUS_PLAYING)
+			{
+				$status = Campaign::CAMPAIGN_STATUS_PLAYING;
+				continue;
+			}
+
+			if($adStatus == Ad::AD_STATUS_PENDING)
+			{
+				$status = Campaign::CAMPAIGN_STATUS_PENDING;
+				break;
+			}
+		}
+
+		return $status;
+	}
+
+
+
+
+
+
+
 	/**
 	 * @param mixed $supportID
 	 * @return Campaign
@@ -317,7 +362,7 @@ class Campaign
 		$this->supportID = $supportID;
 		return $this;
 	}
-	
+
 	/**
 	 * @param mixed $campaignName
 	 * @return Campaign
@@ -327,7 +372,7 @@ class Campaign
 		$this->campaignName = $campaignName;
 		return $this;
 	}
-	
+
 	/**
 	 * @param mixed $startDate
 	 * @return Campaign
@@ -337,7 +382,7 @@ class Campaign
 		$this->startDate = $startDate;
 		return $this;
 	}
-	
+
 	/**
 	 * @param mixed $endDate
 	 * @return Campaign
@@ -347,7 +392,7 @@ class Campaign
 		$this->endDate = $endDate;
 		return $this;
 	}
-	
+
 	/**
 	 * @param mixed $displayDuration
 	 * @return Campaign
@@ -357,7 +402,7 @@ class Campaign
 		$this->displayDuration = $displayDuration;
 		return $this;
 	}
-	
+
 	/**
 	 * @param mixed $adLimit
 	 * @return Campaign
@@ -367,8 +412,8 @@ class Campaign
 		$this->adLimit = $adLimit;
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * Save the campaign
 	 */
@@ -383,8 +428,8 @@ class Campaign
 			$this->displayDuration
 		);
 	}
-	
-	
+
+
 	/**
 	 * Remove the campaign and its dependancies
 	 */
@@ -392,18 +437,18 @@ class Campaign
 	{
 		$_record = \Objects\Record::createRecord(\Objects\Record::CAMPAIGN_REMOVED);
 		$_record->setRef1($this->getID());
-		
+
 		//Remove ads in the campaign
 		$ads = $this->getAds();
-		
+
 		//Remove all ads of the campaign
 		foreach($ads as $ad)
 		{
 			$ad->delete();
 		}
-		
+
 		$this->campaignModel->delete();
-		
+
 		//Remove the campaign Directory
 		rmdir("campaigns/{$this->getCampaignUID()}");
 	}

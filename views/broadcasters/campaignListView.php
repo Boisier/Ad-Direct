@@ -4,24 +4,32 @@
 			<h5 class="mb-0 font-weight-bold"><?php echo $this->campaignName; ?></h5>
 			<small><?php echo $this->supportName; ?></small>
 			<?php
-				if($this->pending > 0)
-				{
-					?>
-					<span class="badge badge-pill badge-warning ml-1" title="<?php echo \__("pendingAds"); ?>"><?php echo $this->pending; ?></span>
-					<?php
-				}
+			$class = "badge badge-pill ml-1 ";
+
+			switch($this->status)
+			{
+                case \Objects\Campaign::CAMPAIGN_STATUS_PLAYING:
+					$class .= "badge-success";
+				break;
+				case \Objects\Campaign::CAMPAIGN_STATUS_PENDING:
+					$class .= "badge-warning";
+				break;
+				default;
+					$class .= "badge-danger";
+			}
 			?>
+            <span class="<?php echo $class; ?>" title="<?php echo \__("pendingAds"); ?>">&nbsp;</span>
 		</div>
 		<div class="col-sm-5">
 			<span class="dates">
-				<?php 
+				<?php
 				$dateFormat = \Library\Localization::dateFormat();
-	
+
 				echo date($dateFormat, $this->startDate);
 				echo "<br>";
 				echo date($dateFormat, $this->endDate);
 				?>
 			</span>
 		</div>
-	</div> 
+	</div>
 </a>
