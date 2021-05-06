@@ -1,7 +1,7 @@
 .idea
 RESSOURCES
 PHP
-assets/third-parties
+#assets/third-parties
 assets/vendor
 campaigns
 thumbs
