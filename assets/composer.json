@@ -1,6 +1,12 @@
 {
-    "require": {
-        "php-ffmpeg/php-ffmpeg": "^0.18.0",
-        "phpmailer/phpmailer": "^6.0"
-    }
+  "require": {
+    "php-ffmpeg/php-ffmpeg": "^0.18.0",
+    "phpmailer/phpmailer": "^6.0",
+    "ext-pdo": "*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "name": "neo/ad-direct",
+  "description": ""
 }

@@ -2,8 +2,8 @@
 	"lang": "fr",
 	"local": "fr_FR",
 	"tabTitle": "Ad-Direct - Neo-Traffic",
-	"legal": "© 2016 - Neo-Traffic tous droits réservés&#9;&#9;<a href=\"http://www.neo-traffic.com/fr\">neo-traffic.com",
-	
+	"legal": "© 2021 - Neo-OOH tous droits réservés&#9;&#9;<a href=\"http://www.neo-traffic.com/fr\">neo-traffic.com",
+
 	"loginText": "Accès au service",
 	"accountIsInactive": "Ce compte est inactif. Merci de nous contater.",
 	"unknownAccount": "Nom d'utilisateur inconnu",
@@ -19,7 +19,7 @@
 	"creativeMsg": "Recommandations",
 
 	"searchHasNoResults": "Aucun résultat",
-	
+
 	"goBack": "Retour",
 	"create": "Créer",
 	"add": "Ajouter",
@@ -48,9 +48,9 @@
 	"adminMenu-Overview": "Accueil",
 	"adminMenu-Clients": "Diffuseurs",
 	"adminMenu-Params": "Paramètres",
-	
+
 	"searchResults": "Résultats de la recherche",
-	
+
 	"client": "Client",
 	"clients": "Clients",
 	"campaign": "Campagne",
@@ -61,7 +61,7 @@
 	"screens": "écrans",
 	"displayFile": "Fichier d'affichage",
 	"value": "Valeur",
-	
+
 	"All": "Tous",
 	"Any": "Tous",
 
@@ -83,7 +83,7 @@
 	"noCreatives": "Pas d'élément",
 
 	"adminOverview-welcomMessage": "Bienvenue",
-	
+
 	"clients-tabTitle": "Diffuseurs",
 	"noBroadcaster": "Il n'existe aucun diffuseur.",
 	"addBroadcaster": "Ajouter un diffuseur",
@@ -100,7 +100,7 @@
 	"editClient": "Modification du compte client",
 	"addCampaign": "Ajouter une campagne",
 	"createCampaign": "Créer la campagne",
-	
+
 	"clientNameField": "Nom du client",
 	"clientEmailField": "Email du client",
 	"clientPasswordField": "Code d'accès du client",
@@ -116,7 +116,7 @@
 	"campaignStartDateField": "Début de la campagne",
 	"campaignEndDateField": "Fin de la campagne",
 	"campaignTargetsField": "Supports d'affichage",
-	
+
 	"globalParameters": "Paramètres globaux",
 	"displaySupports": "Supports d'affichage",
 	"displaySupport": "Support d'affichage",
@@ -127,7 +127,7 @@
 	"paramValueField": "Valeur",
 	"paramValuesField": "Valeurs",
 	"addItemToParam": "Ajouter",
-	
+
 	"addSupport": "Nouveau support",
 	"noScreen": "Aucun écran",
 	"screenInSupportBox": "%(screenNbr) écran",
@@ -149,7 +149,7 @@
 	"deleteScreen-warningMessage": "Êtes-vous sur de vouloir supprimer l'écran %(screenName)? Cette action est irréversible.<br><br>La suppression ne peut avoir lieu que si aucune campagne n'utilise le support.",
 	"deleteMediaType": "Supprimer le format %(mediaName)",
 	"deleteMediaType-warningMessage": "Êtes-vous sur de vouloir supprimer le format %(mediaName)? Cette action est irréversible.<br><br>La suppression ne peut avoir lieu que si aucune campagne n'utilise ce format.",
-	
+
 	"mediaTypes": "Formats des médias",
 	"mediaType": "Format des médias",
 	"createMediaType": "Nouveau format",
@@ -159,7 +159,7 @@
 	"addMimeType": "Ajouter un mime/type",
 	"mimeType": "Mime/Type",
 	"mimeTypes": "Mime/Types",
-	
+
 	"newAdminAccount":"Nouvel administrateur",
 	"addAdminAccount":"Créer un administrateur",
 	"authorizations": "Autorisations",
@@ -175,7 +175,7 @@
 	"editAdminAccount": "Modifier un administrateur",
 	"deleteAdmin": "Supprimer un administrateur",
 	"deleteAdmin-warningMessage": "Êtes-vous sur de vouloir supprimer l'administrateur %(adminName)?<br>Cette action est irréversible.",
-	
+
 	"CampaignHasNoSupport": "Cette campagne ne dispose d'aucun support d'affichage. Ajoutez-en un.",
 	"editCampaign": "Modifier la campagne d'affichage",
 	"addSupportToCampaign": "Ajouter un support à la campagne",
@@ -198,7 +198,7 @@
 	"deleteCampaignModal-message": "Êtes-vous sûr de vouloir supprimer lma campagne %(campaignName) ?<br>Sa suppression entrainera aussi la suppression de tout ses affichages et arrêtera sa diffusion s'il y a lieu.",
 	"deleteCampaign": "Supprimer la campagne",
 	"pendingAds": "Affichage.s en attente de validation",
-	
+
 	"newAd": "Nouvel affichage",
 	"ad": "Affichage",
 	"adStatus-incomplete": "Affichage incomplet",
@@ -209,7 +209,7 @@
 	"adStartDate": "Début de la diffusion",
 	"adEndDate": "Fin de la diffusion",
 	"dragOrClick": "Ajouter un élément",
-	
+
 	"ErrorOnUploadModal-title": "Impossible d'ajouter l'élément",
 	"ErrorOnUploadModal-message": "Une ou plusieurs erreurs on empêchées l'ajout de l'élément. Merci de prendre connaissance de ces erreurs.",
 	"ErrorOnUploadModal-contactUs": "Pour toute question, n'hésitez pas à contacter Neo-Traffic.",
@@ -236,17 +236,17 @@
 	"deleteCreative": "Supprimer l'élément",
 	"deleteCreativeModal-title": "Supprimer l'élément",
 	"deleteCreativeModal-message": "Êtes-vous sûr de vouloir supprimer cet élément? Cette action est irréversible",
-	
+
 	"defaultAds-tab": "Affichages",
 	"defaultAd": "Affichage par défaut",
 	"defaultAds": "Affichages par défaut",
 	"defaultAdSupport": "Affichage par défaut sur %(supportName)",
-	
+
 	"reviewBtn": "Valider / Refuser",
 	"approveReviewAd": "Valider l'affichage",
 	"rejectReviewAd": "Refuser l'affichage",
 	"reviewComment": "Commentaire (facultatif)",
-	
+
 	"broadcasterGroups": "Groupes de diffuseurs",
 	"addBroadcasterGroup": "Créer un groupe",
 	"noBroadcasterGroups": "Il n'existe aucun groupes",
@@ -254,11 +254,11 @@
 	"renameBroadcasterGroup": "Renommer le groupe",
 	"deleteBroadcasterGroup": "Supprimer le groupe",
 	"AllBroadcasterGroups": "Tous les diffuseurs",
-	
+
 	"accessAdDirect" : "Accèder à Ad-Direct",
 	"badEmailText" : "L'email ne semble pas pouvoir être affiché. Il est possible que les informations qu'il contenait ne soit plus valables, entrainant sa suppression.",
 	"contactNeo" : "<p>Pour toute question, n’hésitez pas à nous contacter à l’adresse <a href=\"mailto:infos@neo-traffic.com\" style=\"color:#000\"><strong>infos@neo-traffic.com</strong></a></p>",
-	
+
 	"WELCOME_EMAIL" : "Bienvenue sur Ad-Direct",
 	"CLIENT_UPDATE" : "Mise à jour de vos identifiants",
 	"CLIENT_PASSWORD_UPDATE" : "Mise à jour de vos identifiants",
@@ -267,7 +267,7 @@
 	"SCHEDULE_CAMPAIGN" : "Nouvelle campagne",
 	"SCHEDULE_CAMPAIGN_UPDATE" : "Mise à jour de la campagne",
 	"EMAIL_END_OF_DISPLAY" : "Votre affichage va bientôt se terminer",
-	
+
 	"welcomeToAdDirectTitle": "Bienvenue sur Ad-Direct",
 	"welcomeToAdDirectMessage": "Un compte viens de vous être attribué. Il vous permet de programmer la diffusion de vos matériaux publicitaires facilement.<br><br>Vos identifiants de connexion sont les suivants :",
 	"username": "Nom d'utilisateur",
@@ -298,7 +298,7 @@
 	"creativeStatus-4": "En cours de conversion",
 	"creativeStatus-5": "Conversion échouée. Attente d'un nouvel essai",
 	"uploadCaption": "Mis en ligne par %(uploader) le %(uploadTime)",
-	
+
 	"stats": "Statistiques",
 	"printsTotal": "Total d'impressions",
 
@@ -362,9 +362,9 @@
 	"legalPage-specs": "Spécifications techniques",
 	"legalPage-creatives": "Recommandations créatives",
 
-	
-	
-	
+
+
+
 	"missingFieldError": "Merci de remplir tous les champs.",
 	"broadcasterNameAlreadyExist": "Ce nom est déjà utilisé par un autre diffuseur.",
 	"supportNameAlreadyExist": "Ce nom est déjà utilisé par un autre support.",
@@ -378,7 +378,7 @@
 	"errorWhileDeletingMedia": "Impossible de supprimer le format",
 	"errorWhileDeletingMedia-message": "Impossible de supprimer le format tant que celui-ci est utilisé par une ou plusieurs campagnes.",
 	"cannotChangeSupportIfAdsPresents": "Impossible de modifier le support de la campagne tant que celle-ci contient des affichages.",
-	
+
 	"AD_LIMIT_IN_CAMPAIGN": "Limite d'éléments dans une campagne",
 	"FILE_SIZE_LIMIT": "Poid maximal des affichages (MB)",
 	"ACCEPTED_FRAMERATES": "Framerates acceptés",

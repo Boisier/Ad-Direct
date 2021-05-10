@@ -2,8 +2,8 @@
 	"lang": "en",
 	"local": "en_CA",
 	"tabTitle": "Ad-Direct - Neo-Traffic",
-	"legal": "© 2016 - Neo-Traffic all rights reserved&#9;&#9;<a href=\"http://www.neo-traffic.com/fr\">neo-traffic.com",
-	
+	"legal": "© 2021 - Neo-OOH all rights reserved&#9;&#9;<a href=\"http://www.neo-traffic.com/fr\">neo-traffic.com",
+
 	"loginText": "Service access",
 	"accountIsInactive": "This account is inactive. Please contact us.",
 	"unknownAccount": "Unknown username",
@@ -19,7 +19,7 @@
 	"creativeMsg": "Creative",
 
 	"searchHasNoResults": "No results",
-	
+
 	"goBack": "back",
 	"create": "Create",
 	"add": "Add",
@@ -44,12 +44,12 @@
 	"action": "Action",
 	"message": "Message",
 	"status": "Result",
-	
+
 	"adminMenu-Overview": "Home",
 	"adminMenu-Clients": "Broadcasters",
 	"adminMenu-Params": "Params",
 	"searchResults": "Search results",
-	
+
 	"client": "Client",
 	"clients": "Clients",
 	"campaign": "Campaign",
@@ -60,7 +60,7 @@
 	"screens": "Screens",
 	"displayFile": "Display file",
 	"value": "Value",
-	
+
 	"All": "All",
 	"Any": "Any",
 
@@ -82,7 +82,7 @@
 	"noCreatives": "No creative",
 
 	"adminOverview-welcomMessage": "Welcome",
-	
+
 	"clients-tabTitle": "Broadcasters",
 	"noBroadcaster": "There is no broadcaster.",
 	"addBroadcaster": "Add a broadcaster",
@@ -99,7 +99,7 @@
 	"editClient": "Edit the client account",
 	"addCampaign": "Add a campaign",
 	"createCampaign": "Create the campaigne",
-	
+
 	"clientNameField": "Client name",
 	"clientEmailField": "Client email",
 	"clientPasswordField": "Client access code",
@@ -115,7 +115,7 @@
 	"campaignStartDateField": "Campaign start",
 	"campaignEndDateField": "Campaign end",
 	"campaignTargetsField": "Display support",
-	
+
 	"globalParameters": "Global parameters",
 	"displaySupports": "Display support",
 	"displaySupport": "Display supports",
@@ -126,7 +126,7 @@
 	"paramValueField": "Value",
 	"paramValuesField": "Values",
 	"addItemToParam": "Add",
-	
+
 	"addSupport": "New support",
 	"noScreen": "No screen",
 	"screenInSupportBox": "%(screenNbr) screen",
@@ -146,7 +146,7 @@
 	"editScreen": "Edit screen",
 	"deleteScreen": "Remove screen %(screenName)",
 	"deleteScreen-warningMessage": "Are you sure you want to remove the screen %(screenName)? This action cannot be undone. <br><br>The screen can only be removed if no campaigns are using it.",
-	
+
 	"mediaTypes": "Media format",
 	"mediaType": "Medias formats",
 	"createMediaType": "New format",
@@ -158,7 +158,7 @@
 	"mimeTypes": "Mime/Types",
 	"deleteMediaType": "Remove format %(mediaName)",
 	"deleteMediaType-warningMessage": "Are you sure you want to remove the media format %(mediaName)? This action cannot be undone.<br><br>The media format can only be removed if no campaign are using it.",
-	
+
 	"newAdminAccount":"New admin",
 	"addAdminAccount":"Create a new admin",
 	"authorizations": "Authorisations",
@@ -174,7 +174,7 @@
 	"editAdminAccount": "Edit admin",
 	"deleteAdmin": "Remove admin",
 	"deleteAdmin-warningMessage": "Are you sur you want to remove admin %(adminName) ?<br>This cannot be undone.",
-	
+
 	"CampaignHasNoSupport": "This campaign has no display support. Add one.",
 	"editCampaign": "Edit campaign",
 	"campaignSupportField": "Display support",
@@ -194,7 +194,7 @@
 	"deleteCampaign": "Remove the campaign",
 	"campaignName": "Campaign name",
 	"pendingAds": "Ads waiting approval",
-	
+
 	"newAd": "New Ad",
 	"ad": "Ad",
 	"adStatus-incomplete": "Incomplete ad",
@@ -205,7 +205,7 @@
 	"adStartDate": "Beginning of broadcast",
 	"adEndDate": "End of broadcast",
 	"dragOrClick": "Add a new creative",
-	
+
 	"ErrorOnUploadModal-title": "The creative could not be added",
 	"ErrorOnUploadModal-message": "One or more errors prevented the creative to be added. Please take notice of this errors.",
 	"ErrorOnUploadModal-contactUs": "If you have any question, please contact Neo-Traffic.",
@@ -232,17 +232,17 @@
 	"deleteCreative": "Delete creative",
 	"deleteCreativeModal-title": "Delete creative",
 	"deleteCreativeModal-message": "Are you sure you want to delete this creative ? This cannot be undone.",
-	
+
 	"defaultAds-tab": "Default ads",
 	"defaultAd": "Default ad",
 	"defaultAds": "Default ads",
 	"defaultAdSupport": "Default ad for %(supportName)",
-	
+
 	"reviewBtn": "Approve / Reject",
 	"approveReviewAd": "Approve ad",
 	"rejectReviewAd": "Reject ad",
 	"reviewComment": "Comment (Optionnal)",
-	
+
 	"broadcasterGroups": "Broadcaster group",
 	"addBroadcasterGroup": "Add a group",
 	"noBroadcasterGroups": "There is no group",
@@ -250,11 +250,11 @@
 	"renameBroadcasterGroup": "Rename group",
 	"deleteBroadcasterGroup": "Delete group",
 	"AllBroadcasterGroups": "All Broadcasters",
-	
+
 	"accessAdDirect" : "Access Ad-Direct",
 	"badEmailText" : "This email could not be displayed. Its inforamtions may be outdated, leading to its removal.",
 	"contactNeo" : "<p>For any question, do not hesitate to contact us at <a href=\"mailto:infos@neo-traffic.com\" style=\"color:#000\"><strong>infos@neo-traffic.com</strong></a>.</p>",
-	
+
 	"WELCOME_EMAIL" : "Welcome on Ad-Direct",
 	"CLIENT_UPDATE" : "Login informations update",
 	"CLIENT_PASSWORD_UPDATE" : "Password update",
@@ -263,7 +263,7 @@
 	"SCHEDULE_CAMPAIGN" : "New campaign",
 	"SCHEDULE_CAMPAIGN_UPDATE" : "Campaign update",
 	"END_OF_DISPLAY" : "Your ad will end soon",
-	
+
 	"welcomeToAdDirectTitle": "Welcome on Ad-Direct",
 	"welcomeToAdDirectMessage": "An account has been created for you. It allows you to schedule your ads on the Neo-Traffic network.<br><br>Your login informations are :",
 	"username": "Username",
@@ -294,7 +294,7 @@
 	"creativeStatus-4": "Being converted",
 	"creativeStatus-5": "Conversion failed, waiting for another try.",
 	"uploadCaption": "Uploaded by %(uploader) on %(uploadTime)",
-	
+
 	"stats": "Stats",
 	"printsTotal": "Ad plays",
 
@@ -357,10 +357,10 @@
 	"legalPage-terms": "Terms and conditions",
 	"legalPage-specs": "Technical specifications",
 	"legalPage-creatives": "Creative recommendations",
-	
-	
-	
-	
+
+
+
+
 	"missingFieldError": "Please fill in all the forms.",
 	"broadcasterNameAlreadyExist": "This name il already used by another broadcaster.",
 	"supportNameAlreadyExist": "This name is already used by another support.",
@@ -374,7 +374,7 @@
 	"errorWhileDeletingMedia": "Could not remove the format",
 	"errorWhileDeletingMedia-message": "The format cannot be removed while it is stil used by a campaign.",
 	"cannotChangeSupportIfAdsPresents": "It is not possible to remove the campaign while it still contain ads.",
-	
+
 	"AD_LIMIT_IN_CAMPAIGN": "Default ad limit in campaign",
 	"FILE_SIZE_LIMIT": "Creative max size (MB)",
 	"ACCEPTED_FRAMERATES": "Accepted framerates",
